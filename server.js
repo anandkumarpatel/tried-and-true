@@ -2,6 +2,7 @@ import axios from 'axios'
 import bodyParser from 'body-parser'
 import * as cheerio from 'cheerio'
 import express from 'express'
+import fs from 'fs'
 import { OpenAI } from 'openai'
 import TurndownService from 'turndown'
 // TODO: https://github.com/julianpoy/RecipeClipper
@@ -135,11 +136,25 @@ const aiOutputFormat = {
 // Storage abstraction
 class RecipeStorage {
   constructor() {
-    this.recipes = []
+    this.filePath = './recipes.local.json'
+    this.recipes = this.loadRecipes()
+  }
+
+  loadRecipes() {
+    if (fs.existsSync(this.filePath)) {
+      const data = fs.readFileSync(this.filePath, 'utf-8')
+      return JSON.parse(data)
+    }
+    return []
+  }
+
+  saveRecipes() {
+    fs.writeFileSync(this.filePath, JSON.stringify(this.recipes, null, 2))
   }
 
   addRecipe(recipe) {
     this.recipes.push(recipe)
+    this.saveRecipes()
   }
 
   getAllRecipes() {

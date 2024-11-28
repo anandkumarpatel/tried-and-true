@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 export interface Recipe {
@@ -33,6 +33,21 @@ export interface Direction {
 function App() {
   const [url, setUrl] = useState('')
   const [recipe, setRecipe] = useState<Recipe>()
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/recipes')
+        const data = await response.json()
+        setRecipes(data.recipes)
+      } catch (error) {
+        console.error('Error fetching recipes:', error)
+      }
+    }
+
+    fetchRecipes()
+  }, [])
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
@@ -118,6 +133,17 @@ function App() {
         <button type='submit'>Get Recipe</button>
       </form>
       <div id='recipe-display'>{recipe && displayRecipe(recipe)}</div>
+      <div id='recipe-list'>
+        <h2>All Recipes</h2>
+        <ul>
+          {recipes.map((recipe, index) => (
+            <li key={index}>
+              <h3>{recipe.title}</h3>
+              {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' />}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
