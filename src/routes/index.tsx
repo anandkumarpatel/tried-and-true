@@ -50,12 +50,14 @@ function Home() {
   return (
     <div className='container'>
       <div className='input-section'>
-        <h1 className='title'>Recipe Collection</h1>
+        <h1 className='title'>Tried & True</h1>
         <form onSubmit={handleSubmit} className='form'>
-          <label htmlFor='url' className='label'>
-            Recipe URL:
-          </label>
-          <input type='url' id='url' name='url' value={url} onChange={(e) => setUrl(e.target.value)} required className='input' />
+          <div>
+            <label htmlFor='url' className='label'>
+              Recipe URL:
+            </label>
+            <input type='url' id='url' name='url' value={url} onChange={(e) => setUrl(e.target.value)} required className='input' />
+          </div>
           <button type='submit' className='button'>
             Get Recipe
           </button>
@@ -69,10 +71,10 @@ function Home() {
               <div className='recipe-card'>
                 <Link to={`/recipe/${recipe.id}`} className='recipe-link'>
                   <div className='recipe-content'>
+                    {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' className='recipe-image' />}
                     <div className='recipe-text'>
                       <h3>{recipe.title}</h3>
                     </div>
-                    {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' className='recipe-image' />}
                   </div>
                 </Link>
               </div>
