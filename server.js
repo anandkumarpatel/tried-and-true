@@ -162,6 +162,10 @@ class RecipeStorage {
   getAllRecipes() {
     return this.recipes
   }
+
+  getRecipeById(id) {
+    return this.recipes.find((recipe) => recipe.id === id)
+  }
 }
 
 const recipeStorage = new RecipeStorage()
@@ -201,6 +205,21 @@ app.get('/recipes', (req, res) => {
   } catch (error) {
     console.error('Error getting recipes:', error)
     res.status(500).send('Error getting recipes')
+  }
+})
+
+// Route to get a recipe by id
+app.get('/recipes/:id', (req, res) => {
+  try {
+    const recipe = recipeStorage.getRecipeById(req.params.id)
+    if (recipe) {
+      res.json({ recipe })
+    } else {
+      res.status(404).send('Recipe not found')
+    }
+  } catch (error) {
+    console.error('Error getting recipe:', error)
+    res.status(500).send('Error getting recipe')
   }
 })
 
