@@ -189,6 +189,7 @@ app.post('/scrape', async (req, res) => {
     const turndownService = new TurndownService()
     const markdown = turndownService.turndown(body)
     const recipe = await extractRecipeFromText(markdown)
+    recipe.sourceUrl = url
     recipeStorage.addRecipe(recipe)
     res.json({ recipe })
   } catch (error) {
@@ -244,7 +245,7 @@ async function extractRecipeFromText(text) {
         },
       ],
       temperature: 0,
-      max_tokens: 16383,
+      max_tokens: 16000,
     })
     const out = response.choices[0].message.content
     if (!out) {

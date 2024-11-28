@@ -2,9 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Recipe } from '../../types'
 import './RecipePage.css'
 
+const baseUrl = import.meta.env.VITE_BACKEND_URL
+
 export const Route = createFileRoute('/recipe/$recipeId')({
   loader: async ({ params }) => {
-    const response = await fetch(`http://localhost:3000/recipe/${params.recipeId}`)
+    const response = await fetch(`${baseUrl}/recipe/${params.recipeId}`)
     const recipe = (await response.json()) as Recipe
     return recipe
   },
@@ -47,7 +49,7 @@ function RecipePage() {
             </li>
           ))}
         </ol>
-        {recipe.notes && (
+        {recipe.notes?.length && recipe.notes.length > 0 ? (
           <>
             <h3>Notes</h3>
             <ul>
@@ -56,7 +58,14 @@ function RecipePage() {
               ))}
             </ul>
           </>
-        )}
+        ) : null}
+
+        <p>
+          Source:{' '}
+          <a href={recipe.sourceUrl} target='_blank' rel='noopener noreferrer'>
+            {recipe.sourceUrl}
+          </a>
+        </p>
       </div>
     </div>
   )

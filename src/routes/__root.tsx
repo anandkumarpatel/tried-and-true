@@ -5,7 +5,7 @@ import './root.css'
 export const Route = createRootRoute({
   component: () => (
     <>
-      <div className='glass-card'>
+      <div className='navbar'>
         <Link to='/' className='link'>
           Home
         </Link>{' '}

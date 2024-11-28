@@ -13,29 +13,24 @@ body {
 
 .navbar {
   width: 100%;
+  margin-bottom: .5rem;
   display: flex;
   justify-content: center;
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.496);
   backdrop-filter: blur(10px);
+  border-radius: 8px;
   padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .link {
-  color: black;
+  color: white;
   font-weight: normal;
 }
 
 .link.active {
   font-weight: bold;
-}
-
-.glass-card {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

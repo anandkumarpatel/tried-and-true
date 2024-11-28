@@ -5,10 +5,12 @@ import { Recipe, RecipeRes } from '../types'
 import { useNavigate } from '@tanstack/react-router'
 import './index.css'
 
+const baseUrl = import.meta.env.VITE_BACKEND_URL
+
 export const Route = createFileRoute('/')({
   component: Home,
   loader: async (): Promise<{ recipes: Recipe[] }> => {
-    const response = await fetch('http://localhost:3000/recipes')
+    const response = await fetch(`${baseUrl}/recipes`)
     const recipes = (await response.json()) as RecipeRes
     return recipes
   },
@@ -21,7 +23,7 @@ function Home() {
 
   const scrape = async (url: string): Promise<Recipe> => {
     try {
-      const response = await fetch('http://localhost:3000/scrape', {
+      const response = await fetch(`${baseUrl}/scrape`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

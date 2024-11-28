@@ -1,5 +1,6 @@
 export interface Recipe {
   id: string
+  sourceUrl: string
   title: string
   prepTime: number
   prepTimeUnit: string
