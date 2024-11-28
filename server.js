@@ -209,7 +209,7 @@ app.get('/recipes', (req, res) => {
 })
 
 // Route to get a recipe by id
-app.get('/recipes/:id', (req, res) => {
+app.get('/recipe/:id', (req, res) => {
   try {
     const recipe = recipeStorage.getRecipeById(req.params.id)
     if (recipe) {
