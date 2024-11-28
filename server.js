@@ -5,6 +5,7 @@ import express from 'express'
 import fs from 'fs'
 import { OpenAI } from 'openai'
 import TurndownService from 'turndown'
+import { v4 as uuidv4 } from 'uuid'
 // TODO: https://github.com/julianpoy/RecipeClipper
 
 const app = express()
@@ -153,6 +154,7 @@ class RecipeStorage {
   }
 
   addRecipe(recipe) {
+    recipe.id = uuidv4()
     this.recipes.push(recipe)
     this.saveRecipes()
   }
