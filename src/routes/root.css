@@ -1,0 +1,41 @@
+#root {
+  width: 100vw;
+  justify-items: center;
+}
+
+body {
+  background: url('/wood.jpg') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: black;
+}
+
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: black;
+  backdrop-filter: blur(10px);
+  padding: 16px;
+}
+
+.link {
+  color: black;
+  font-weight: normal;
+}
+
+.link.active {
+  font-weight: bold;
+}
+
+.glass-card {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
