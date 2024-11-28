@@ -225,7 +225,6 @@ app.get('/recipe/:id', (req, res) => {
 
 async function extractRecipeFromText(text) {
   const prompt = `Extract\n1. ingredients (substitutions, notes, and images are optional only add them if they are provided and preparation means how to cut or prepare the ingredient for example: diced, cubed, shredded, minced, ...etc)\n2. recipe instructions with photos if they are provided\n3. prep and cooking times\n4. title and title images\n5. Serving size: if there is a range, always pick the larger number\nfrom the following blog. Keep the ingredients and instructions the same, do not modify them. Only use text from the blog, do NOT make up your own.\n\n${text}`
-  console.log('Prompt:', prompt)
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

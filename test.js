@@ -19,9 +19,7 @@ get(url)
     if (!body) {
       throw new Error('No body found')
     }
-    var markdown = turndownService.turndown(body)
-
-    console.log(markdown)
+    const markdown = turndownService.turndown(body)
   })
   .catch((error) => {
     console.error('Error fetching the webpage:', error)

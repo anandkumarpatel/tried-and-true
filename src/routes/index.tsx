@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { createFileRoute } from '@tanstack/react-router'
 import { Recipe, RecipeRes } from '../types'
 import { useNavigate } from '@tanstack/react-router'
+import './index.css'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -47,22 +48,34 @@ function Home() {
   }
 
   return (
-    <div>
-      <h1>Recipe Collection</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor='url'>Recipe URL:</label>
-        <input type='url' id='url' name='url' value={url} onChange={(e) => setUrl(e.target.value)} required />
-        <button type='submit'>Get Recipe</button>
-      </form>
-      <div id='recipe-list'>
-        <h2>All Recipes</h2>
-        <ul>
+    <div className='container'>
+      <div className='input-section'>
+        <h1 className='title'>Recipe Collection</h1>
+        <form onSubmit={handleSubmit} className='form'>
+          <label htmlFor='url' className='label'>
+            Recipe URL:
+          </label>
+          <input type='url' id='url' name='url' value={url} onChange={(e) => setUrl(e.target.value)} required className='input' />
+          <button type='submit' className='button'>
+            Get Recipe
+          </button>
+        </form>
+      </div>
+      <div id='recipe-list' className='list-section'>
+        <h2 className='subtitle'>All Recipes</h2>
+        <ul className='recipe-list'>
           {recipes.map((recipe, index) => (
-            <li key={index}>
-              <Link to={`/recipe/${recipe.id}`}>
-                <h3>{recipe.title}</h3>
-                {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' />}
-              </Link>
+            <li key={index} className='recipe-item'>
+              <div className='recipe-card'>
+                <Link to={`/recipe/${recipe.id}`} className='recipe-link'>
+                  <div className='recipe-content'>
+                    <div className='recipe-text'>
+                      <h3>{recipe.title}</h3>
+                    </div>
+                    {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' className='recipe-image' />}
+                  </div>
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
