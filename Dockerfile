@@ -15,11 +15,12 @@ ENV DB=/db
 # Set the working directory
 WORKDIR /usr/src/app
 
-# Copy only server.js and package.json
-COPY server.js package.json package-lock.json .env.backend ./
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY server.js .env.backend ./
 
 # Install dependencies
-RUN npm install
 
 # Expose the port the app runs on
 EXPOSE 3000
