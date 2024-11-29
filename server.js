@@ -7,6 +7,7 @@ import { OpenAI } from 'openai'
 import TurndownService from 'turndown'
 import { v4 as uuidv4 } from 'uuid'
 import dotenv from 'dotenv'
+import puppeteer from 'puppeteer' // Add puppeteer import
 
 dotenv.config({ path: '.env.backend' })
 // TODO: https://github.com/julianpoy/RecipeClipper
@@ -25,6 +26,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+const log = (...args) => {
+  if (!process.env.DEBUG_LOG) return
+  console.log(...args)
+}
 const aiOutputFormat = {
   name: 'recipe',
   strict: false,
@@ -175,9 +180,22 @@ const recipeStorage = new RecipeStorage()
 
 app.post('/scrape', async (req, res) => {
   const { url } = req.body
+  log('Scraping:', url)
+  let tag = 'body'
   try {
-    const response = await axios.get(url)
-    const html = response.data
+    let html
+    if (url.includes('instagram.com')) {
+      log('Using Puppeteer for Instagram URL')
+      const browser = await puppeteer.launch()
+      const page = await browser.newPage()
+      await page.goto(url, { waitUntil: 'networkidle2' })
+      html = await page.content()
+      await browser.close()
+      tag = 'article'
+    } else {
+      const response = await axios.get(url)
+      html = response.data
+    }
     const $ = cheerio.load(html)
     $('script').remove()
     $('header').remove()
@@ -185,7 +203,7 @@ app.post('/scrape', async (req, res) => {
     $('style').remove()
     $('link').remove()
     $('[class*="comment"]').remove()
-    const body = $('body').html()
+    const body = $(tag).html()
     if (!body) {
       throw new Error('No body found')
     }
@@ -203,6 +221,7 @@ app.post('/scrape', async (req, res) => {
 
 // Route to get all recipes
 app.get('/recipes', (req, res) => {
+  log('Getting all recipes')
   try {
     const recipes = recipeStorage.getAllRecipes()
     res.json({ recipes })
@@ -214,6 +233,7 @@ app.get('/recipes', (req, res) => {
 
 // Route to get a recipe by id
 app.get('/recipe/:id', (req, res) => {
+  log('Getting recipe:', req.params.id)
   try {
     const recipe = recipeStorage.getRecipeById(req.params.id)
     if (recipe) {
@@ -229,6 +249,7 @@ app.get('/recipe/:id', (req, res) => {
 
 async function extractRecipeFromText(text) {
   const prompt = `Extract\n1. ingredients (substitutions, notes, and images are optional only add them if they are provided and preparation means how to cut or prepare the ingredient for example: diced, cubed, shredded, minced, ...etc)\n2. recipe instructions with photos if they are provided\n3. prep and cooking times\n4. title and title images\n5. Serving size: if there is a range, always pick the larger number\nfrom the following blog. Keep the ingredients and instructions the same, do not modify them. Only use text from the blog, do NOT make up your own.\n\n${text}`
+  log('Prompt:', prompt)
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -264,4 +285,5 @@ async function extractRecipeFromText(text) {
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
+  log('DEBUG mode is on')
 })

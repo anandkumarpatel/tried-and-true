@@ -41,6 +41,9 @@ function Home() {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
+    if (loading) return
+    if (!url) return alert('Please enter a URL')
+
     setLoading(true)
 
     try {
