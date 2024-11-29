@@ -19,6 +19,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const { recipes } = Route.useLoaderData() as { recipes: Recipe[] }
   const [url, setUrl] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const scrape = async (url: string): Promise<Recipe> => {
@@ -40,12 +41,16 @@ function Home() {
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()
+    setLoading(true)
 
     try {
       const recipe = await scrape(url)
       navigate({ to: `/recipe/${recipe.id}` })
     } catch (error) {
       console.error('Error fetching recipe:', error)
+      alert('Error saving recipe, try again')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -60,8 +65,8 @@ function Home() {
             </label>
             <input type='url' id='url' name='url' value={url} onChange={(e) => setUrl(e.target.value)} required className='input' />
           </div>
-          <button type='submit' className='button'>
-            Get Recipe
+          <button type='submit' className='button' disabled={loading}>
+            {loading ? 'Loading...' : 'Get Recipe'}
           </button>
         </form>
       </div>

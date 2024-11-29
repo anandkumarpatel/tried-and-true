@@ -7,7 +7,7 @@ ENV DB=/db
 WORKDIR /usr/src/app
 
 # Copy only server.js and package.json
-COPY server.js package.json package-lock.json .env ./
+COPY server.js package.json package-lock.json .env.backend ./
 
 # Install dependencies
 RUN npm install

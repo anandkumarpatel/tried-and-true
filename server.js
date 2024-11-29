@@ -8,7 +8,7 @@ import TurndownService from 'turndown'
 import { v4 as uuidv4 } from 'uuid'
 import dotenv from 'dotenv'
 
-dotenv.config()
+dotenv.config({ path: '.env.backend' })
 // TODO: https://github.com/julianpoy/RecipeClipper
 
 const app = express()
