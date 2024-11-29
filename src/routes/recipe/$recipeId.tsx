@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Recipe } from '../../types'
-import './RecipePage.css'
+import './$recipeId.css'
+import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react' // Add useState import
+import { useCallback } from 'react'
 
 const baseUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -15,6 +18,45 @@ export const Route = createFileRoute('/recipe/$recipeId')({
 
 function RecipePage() {
   const { recipe } = Route.useLoaderData() as { recipe: Recipe }
+  const navigate = useNavigate()
+  const [holding, setHolding] = useState(false) // Add state for holding
+
+  const handleDelete = useCallback(
+    async (recipeId: string) => {
+      const response = await fetch(`${baseUrl}/recipe/${recipeId}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        navigate({ to: `/` })
+      } else {
+        // Handle error
+        console.error('Failed to delete the recipe')
+        alert('Failed to delete the recipe')
+      }
+    },
+    [navigate]
+  )
+
+  useEffect(() => {
+    if (!holding) return
+    const timeout = setTimeout(() => {
+      if (holding) {
+        handleDelete(recipe.id)
+      }
+    }, 5000) // Require holding for 5 seconds
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [holding, handleDelete, recipe.id])
+
+  const handleMouseDown = () => {
+    setHolding(true)
+  }
+
+  function handleMouseUp() {
+    setHolding(false)
+  }
 
   return (
     <div className='recipe-page-container'>
@@ -66,6 +108,14 @@ function RecipePage() {
             {recipe.sourceUrl}
           </a>
         </p>
+        <button
+          className={`delete-button ${holding ? 'holding' : ''}`} // Apply holding class
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          Hold to Delete
+        </button>
       </div>
     </div>
   )

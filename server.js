@@ -165,6 +165,7 @@ class RecipeStorage {
     recipe.id = uuidv4()
     this.recipes.push(recipe)
     this.saveRecipes()
+    return recipe
   }
 
   getAllRecipes() {
@@ -173,6 +174,14 @@ class RecipeStorage {
 
   getRecipeById(id) {
     return this.recipes.find((recipe) => recipe.id === id)
+  }
+
+  deleteRecipeById(id) {
+    const initialLength = this.recipes.length
+    this.recipes = this.recipes.filter((recipe) => recipe.id !== id)
+    if (this.recipes.length < initialLength) {
+      this.saveRecipes()
+    }
   }
 }
 
@@ -214,8 +223,9 @@ app.post('/scrape', async (req, res) => {
     const markdown = turndownService.turndown(body)
     const recipe = await extractRecipeFromText(markdown)
     recipe.sourceUrl = url
-    recipeStorage.addRecipe(recipe)
-    res.json({ recipe })
+
+    const newRecipe = recipeStorage.addRecipe(recipe)
+    res.json({ recipe: newRecipe })
   } catch (error) {
     console.error('Error processing HTML:', error)
     res.status(500).send('Error processing HTML')
@@ -247,6 +257,18 @@ app.get('/recipe/:id', (req, res) => {
   } catch (error) {
     console.error('Error getting recipe:', error)
     res.status(500).send('Error getting recipe')
+  }
+})
+
+// Route to delete a recipe by id
+app.delete('/recipe/:id', (req, res) => {
+  log('Deleting recipe:', req.params.id)
+  try {
+    recipeStorage.deleteRecipeById(req.params.id)
+    res.status(204).send()
+  } catch (error) {
+    console.error('Error deleting recipe:', error)
+    res.status(500).send('Error deleting recipe')
   }
 })
 

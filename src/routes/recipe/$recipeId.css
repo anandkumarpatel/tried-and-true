@@ -25,3 +25,22 @@
   display: block;
   margin: 10px auto;
 }
+
+.delete-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 4.5s linear; /* Add transition for background color */
+}
+
+.delete-button.holding {
+  background-color: darkred; /* Final color after holding */
+}
+
+.delete-button:hover {
+  background-color: yellow;
+}
