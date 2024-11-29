@@ -145,7 +145,7 @@ const aiOutputFormat = {
 // Storage abstraction
 class RecipeStorage {
   constructor() {
-    this.filePath = (process.env.DB || '') + './recipes.local.json'
+    this.filePath = './db/recipes.local.json'
     this.recipes = this.loadRecipes()
   }
 
