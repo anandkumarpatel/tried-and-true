@@ -7,7 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:clean": "npm run docker -- kill ${NAME}; npm run docker -- rm ${NAME} || true",
+    "deploy:clean-images": "npm run ssh -- 'docker rmi $(docker images -f \"dangling=true\" -q)' || true",
+    "deploy:build": "npm run docker -- build -t ${NAME}:v1 .",
+    "deploy": "npm run deploy:build && npm run cleanStart && npm run deploy:clean-images && npm run logs",
+    "cleanStart": "npm run deploy:clean && npm run docker -- run --name ${NAME} -v ./db:/usr/src/app/db --restart=always -p 80:3000 -d ${NAME}:v1",
+    "docker": "docker -H ssh://ubuntu@${API_BOX}",
+    "logs": "npm run docker -- logs ${NAME} -f --tail ${LOGS:-10}",
+    "ssh": "ssh ubuntu@${API_BOX}"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.84.2",
@@ -15,6 +23,7 @@
     "axios": "^1.7.8",
     "body-parser": "^1.20.3",
     "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "langchain": "^0.3.6",
     "openai": "^4.73.1",

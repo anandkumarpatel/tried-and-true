@@ -1,0 +1,10 @@
+# Ignore everything
+
+\*\*
+
+# Except server.js, package.json, package-lock.json, and .env
+
+!server.js
+!package.json
+!package-lock.json
+!.env
