@@ -1,9 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useCallback, useState } from 'react' // Add useState import
 import { Recipe } from '../../types'
 import './$recipeId.css'
-import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react' // Add useState import
-import { useCallback } from 'react'
 
 const baseUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -19,7 +17,7 @@ export const Route = createFileRoute('/recipe/$recipeId')({
 function RecipePage() {
   const { recipe } = Route.useLoaderData() as { recipe: Recipe }
   const navigate = useNavigate()
-  const [holding, setHolding] = useState(false) // Add state for holding
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -37,25 +35,13 @@ function RecipePage() {
     [navigate]
   )
 
-  useEffect(() => {
-    if (!holding) return
-    const timeout = setTimeout(() => {
-      if (holding) {
-        handleDelete(recipe.id)
-      }
-    }, 5000) // Require holding for 5 seconds
-
-    return () => {
-      clearTimeout(timeout)
+  const handleDeleteClick = () => {
+    if (confirmDelete) {
+      handleDelete(recipe.id)
+    } else {
+      setConfirmDelete(true)
+      setTimeout(() => setConfirmDelete(false), 3000)
     }
-  }, [holding, handleDelete, recipe.id])
-
-  const handleMouseDown = () => {
-    setHolding(true)
-  }
-
-  function handleMouseUp() {
-    setHolding(false)
   }
 
   return (
@@ -108,13 +94,8 @@ function RecipePage() {
             {recipe.sourceUrl}
           </a>
         </p>
-        <button
-          className={`delete-button ${holding ? 'holding' : ''}`} // Apply holding class
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          Hold to Delete
+        <button className='delete-button' onClick={handleDeleteClick}>
+          {confirmDelete ? 'Really Delete?' : 'Delete'}
         </button>
       </div>
     </div>
