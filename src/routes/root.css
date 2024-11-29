@@ -1,13 +1,13 @@
 #root {
   width: 100vw;
   justify-items: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 body {
   background: url('/wood.jpg') no-repeat center center fixed;
   background-size: cover;
   margin: 0;
-  font-family: Arial, sans-serif;
   color: black;
 }
 
@@ -28,9 +28,9 @@ body {
 
 .link {
   color: white;
-  font-weight: normal;
+  font-weight: 500;
 }
 
 .link.active {
-  font-weight: bold;
+  font-weight: 700;
 }

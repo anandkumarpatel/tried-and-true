@@ -6,6 +6,9 @@ import fs from 'fs'
 import { OpenAI } from 'openai'
 import TurndownService from 'turndown'
 import { v4 as uuidv4 } from 'uuid'
+import dotenv from 'dotenv'
+
+dotenv.config()
 // TODO: https://github.com/julianpoy/RecipeClipper
 
 const app = express()
@@ -19,7 +22,7 @@ app.use((req, res, next) => {
 })
 
 const openai = new OpenAI({
-  apiKey: process.env.README_OPENAI,
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
 const aiOutputFormat = {
@@ -137,7 +140,7 @@ const aiOutputFormat = {
 // Storage abstraction
 class RecipeStorage {
   constructor() {
-    this.filePath = './recipes.local.json'
+    this.filePath = (process.env.DB || '') + './recipes.local.json'
     this.recipes = this.loadRecipes()
   }
 
