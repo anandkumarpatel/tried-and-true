@@ -1,7 +1,16 @@
 
 # Use the official Node.js image as the base image
-FROM node:20.16.0
+FROM node:20-alpine
 
+RUN apk add --no-cache \
+    ca-certificates \
+    curl \
+    udev \
+    ttf-freefont \
+    chromium
+
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV DB=/db
 # Set the working directory
 WORKDIR /usr/src/app
