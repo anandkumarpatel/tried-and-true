@@ -44,3 +44,15 @@
 .delete-button:hover {
   background-color: yellow;
 }
+
+.servings-button {
+  margin: 0 5px;
+}
+
+.servings-count {
+  padding: 0 10px;
+}
+
+.servings-count.modified {
+  background-color: lightyellow;
+}

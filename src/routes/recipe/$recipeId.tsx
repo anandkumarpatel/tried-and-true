@@ -18,6 +18,7 @@ function RecipePage() {
   const { recipe } = Route.useLoaderData() as { recipe: Recipe }
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [servings, setServings] = useState(recipe.servings)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -44,6 +45,19 @@ function RecipePage() {
     }
   }
 
+  const handleServingsChange = (delta: number) => {
+    setServings((prevServings) => Math.max(1, prevServings + delta))
+  }
+
+  const roundToNearestSixteenth = (value: number) => {
+    return Math.round(value * 16) / 16
+  }
+
+  const adjustedIngredients = recipe.ingredients.map((ingredient) => ({
+    ...ingredient,
+    amount: roundToNearestSixteenth((ingredient.amount * servings) / recipe.servings),
+  }))
+
   return (
     <div className='recipe-page-container'>
       <div className='recipe-page'>
@@ -57,11 +71,20 @@ function RecipePage() {
         <p>
           Total Time: {recipe.totalTime} {recipe.totalTimeUnit}
         </p>
-        <p>Servings: {recipe.servings}</p>
+        <p>
+          Servings:
+          <button disabled={servings === 1} onClick={() => handleServingsChange(-1)} className='servings-button'>
+            -
+          </button>
+          <span className={`servings-count ${servings !== recipe.servings ? 'modified' : ''}`}>{servings}</span>
+          <button onClick={() => handleServingsChange(1)} className='servings-button'>
+            +
+          </button>
+        </p>
         {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} className='responsive-image' />}
         <h3>Ingredients</h3>
         <ul>
-          {recipe.ingredients.map((ingredient, index) => (
+          {adjustedIngredients.map((ingredient, index) => (
             <li key={index}>
               {ingredient.amount} {ingredient.amountUnit} {ingredient.name} {ingredient.preparation && `(${ingredient.preparation})`}
               {ingredient.notes && ` - ${ingredient.notes}`}

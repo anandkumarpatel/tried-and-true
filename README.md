@@ -3,7 +3,6 @@
 # TODO
 
 - edit & revert recipe
-- add proportion calculator
 - add tags
 - add rating
 - add search
