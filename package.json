@@ -13,7 +13,7 @@
     "deploy:clean-images": "npm run ssh -- 'docker rmi $(docker images -f \"dangling=true\" -q)' || true",
     "deploy:build": "npm run docker -- build -t ${NAME}:v1 .",
     "deploy": "npm run deploy:build && npm run cleanStart && npm run deploy:clean-images && npm run logs",
-    "cleanStart": "npm run deploy:clean && npm run docker -- run --name ${NAME} -v ./db:/usr/src/app/db --restart=always -p 80:3000 -d ${NAME}:v1",
+    "cleanStart": "npm run deploy:clean && npm run docker -- run --name ${NAME} -v ./db:/usr/src/app/db --restart=always -p 80:${PORT} -d ${NAME}:v1",
     "docker": "docker -H ssh://ubuntu@${API_BOX}",
     "logs": "npm run docker -- logs ${NAME} -f --tail ${LOGS:-10}",
     "ssh": "ssh ubuntu@${API_BOX}"
