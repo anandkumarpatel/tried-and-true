@@ -17,7 +17,7 @@ export default defineConfig({
         description: 'Recipe collector',
         theme_color: '#ffffff',
         share_target: {
-          action: '#/share-target',
+          action: '#/share',
           method: 'GET',
           params: {
             title: 'title',
