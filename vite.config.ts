@@ -17,7 +17,7 @@ export default defineConfig({
         description: 'Recipe collector',
         theme_color: '#ffffff',
         share_target: {
-          action: '/#/share',
+          action: '/share',
           method: 'GET',
           params: {
             title: 'title',
@@ -46,6 +46,21 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/.*$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+              },
+            },
           },
         ],
       },
