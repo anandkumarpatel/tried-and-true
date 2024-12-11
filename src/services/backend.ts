@@ -2,7 +2,7 @@ import { Recipe, RecipeRes, RecipesRes } from '../types'
 
 const baseUrl = import.meta.env.VITE_BACKEND_URL
 
-export const scrape = async (url: string): Promise<Recipe> => {
+export const scrape = async (url: string, controller = new AbortController()): Promise<Recipe> => {
   try {
     const response = await fetch(`${baseUrl}/scrape`, {
       method: 'POST',
@@ -10,6 +10,7 @@ export const scrape = async (url: string): Promise<Recipe> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ url }),
+      signal: controller.signal,
     })
     const data = await response.json()
     return data.recipe

@@ -20,17 +20,20 @@ function Share() {
   const { title, text, url } = Route.useSearch()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const needsRedirect = window.location.search && window.location.hash.endsWith('/share')
 
   const finalUrl = url || text || title
 
   useEffect(() => {
+    if (needsRedirect) return
     if (!finalUrl || !loading) {
-      setTimeout(() => navigate({ to: '/' }), 3000)
+      setTimeout(() => navigate({ to: '/' }), 5000)
       return
     }
-    scrape(finalUrl)
+    const controller = new AbortController()
+    scrape(finalUrl, controller)
       .then((recipe) => {
-        navigate({ to: `/recipe/${recipe.id}` })
+        navigate({ to: `/recipe/${recipe.id}`, search: {} })
       })
       .catch((error) => {
         console.error('Error creating recipe:', error)
@@ -39,8 +42,14 @@ function Share() {
       .finally(() => {
         setLoading(false)
       })
-  }, [finalUrl, navigate, loading])
 
+    return () => controller.abort('effect done')
+  }, [finalUrl, navigate, loading, needsRedirect])
+
+  if (needsRedirect) {
+    window.location.replace(window.location.pathname + window.location.hash + window.location.search)
+    return null
+  }
   if (!finalUrl) return <div className='container'>Sharing failed, returning to home page...</div>
   if (!loading) return <div className='container'>error loading recipe from {finalUrl}, returning to home page..</div>
   return <div className='container'>loading recipe from {finalUrl}</div>
