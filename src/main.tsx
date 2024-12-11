@@ -33,6 +33,10 @@ declare module '@tanstack/react-router' {
   }
 }
 
+if (window.location.search) {
+  window.location.replace(window.location.pathname + window.location.hash + window.location.search)
+}
+
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
