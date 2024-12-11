@@ -307,7 +307,7 @@ async function extractRecipeFromText(text) {
   }
 }
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 7138
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
   log('DEBUG mode is on')

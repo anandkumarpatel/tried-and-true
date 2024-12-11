@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback, useState } from 'react' // Add useState import
-import { Recipe } from '../../types'
+import { useCallback, useState } from 'react'
+import { Recipe, Ingredient } from '../../types'
 import './$recipeId.css'
 
 const baseUrl = import.meta.env.VITE_BACKEND_URL
@@ -14,11 +14,17 @@ export const Route = createFileRoute('/recipe/$recipeId')({
   component: RecipePage,
 })
 
+const roundToNearestSixteenth = (value: number) => {
+  return Math.round(value * 16) / 16
+}
+
 function RecipePage() {
   const { recipe } = Route.useLoaderData() as { recipe: Recipe }
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -49,14 +55,24 @@ function RecipePage() {
     setServings((prevServings) => Math.max(1, prevServings + delta))
   }
 
-  const roundToNearestSixteenth = (value: number) => {
-    return Math.round(value * 16) / 16
-  }
+  const handleSaveIngredients = useCallback(async () => {
+    // TODO add route on backend
+    const response = await fetch(`${baseUrl}/recipe/${recipe.id}/ingredients`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(editedIngredients),
+    })
+    if (!response.ok) {
+      console.error('Failed to save ingredients')
+      alert('Failed to save ingredients')
+    }
+  }, [editedIngredients, recipe.id])
 
-  const adjustedIngredients = recipe.ingredients.map((ingredient) => ({
-    ...ingredient,
-    amount: roundToNearestSixteenth((ingredient.amount * servings) / recipe.servings),
-  }))
+  const handleIngredientChange = (index: number, name: string, value: string | number) => {
+    setEditedIngredients((prev) => prev.map((ingredient, i) => (i === index ? { ...ingredient, [name]: value } : ingredient)))
+  }
 
   return (
     <div className='recipe-page-container'>
@@ -83,12 +99,27 @@ function RecipePage() {
         </p>
         {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} className='responsive-image' />}
         <h3>Ingredients</h3>
+        <button
+          onClick={() => {
+            if (isEditing) {
+              handleSaveIngredients()
+            }
+            setIsEditing(!isEditing)
+          }}
+          className='edit-button'
+        >
+          {isEditing ? 'Done' : 'Edit'}
+        </button>
         <ul>
-          {adjustedIngredients.map((ingredient, index) => (
-            <li key={index}>
-              {ingredient.amount} {ingredient.amountUnit} {ingredient.name} {ingredient.preparation && `(${ingredient.preparation})`}
-              {ingredient.notes && ` - ${ingredient.notes}`}
-            </li>
+          {editedIngredients.map((ingredient, index) => (
+            <IngredientLine
+              key={index}
+              ingredient={ingredient}
+              isEditing={isEditing}
+              onChange={(name, value) => handleIngredientChange(index, name, value)}
+              baseServings={recipe.servings}
+              currentServings={servings}
+            />
           ))}
         </ul>
         <h3>Directions</h3>
@@ -122,6 +153,44 @@ function RecipePage() {
         </button>
       </div>
     </div>
+  )
+}
+
+function IngredientLine({
+  ingredient,
+  isEditing,
+  onChange,
+  baseServings,
+  currentServings,
+}: {
+  ingredient: Ingredient
+  isEditing: boolean
+  baseServings: number
+  currentServings: number
+  onChange: (name: string, value: string | number) => void
+}) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    onChange(name, value)
+  }
+  const amount = roundToNearestSixteenth((ingredient.amount * currentServings) / baseServings)
+  return (
+    <li>
+      {isEditing ? (
+        <>
+          <input type='number' name='amount' value={ingredient.amount} onChange={handleChange} placeholder='Amount' />
+          <input type='text' name='amountUnit' value={ingredient.amountUnit} onChange={handleChange} placeholder='Unit' />
+          <input type='text' name='name' value={ingredient.name} onChange={handleChange} placeholder='Name' />
+          <input type='text' name='preparation' value={ingredient.preparation} onChange={handleChange} placeholder='Preparation' />
+          <input type='text' name='notes' value={ingredient.notes} onChange={handleChange} placeholder='Notes' />
+        </>
+      ) : (
+        <>
+          {amount} {ingredient.amountUnit} {ingredient.name} {ingredient.preparation && `(${ingredient.preparation})`}
+          {ingredient.notes && ` - ${ingredient.notes}`}
+        </>
+      )}
+    </li>
   )
 }
 

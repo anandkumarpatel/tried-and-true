@@ -2,7 +2,9 @@
 
 # TODO
 
-- edit & revert recipe
+- save & revert recipe
+- ingredient group (for parts of recipe)
+- fix ai to say "box" or "can" in description
 - add tags
 - add rating
 - add search
