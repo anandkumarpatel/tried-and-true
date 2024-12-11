@@ -1,15 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
-import { Recipe, Ingredient } from '../../types'
+import { deleteRecipe, getRecipe, updateRecipe } from '../../services/backend'
+import { Ingredient } from '../../types'
 import './$recipeId.css'
-
-const baseUrl = import.meta.env.VITE_BACKEND_URL
 
 export const Route = createFileRoute('/recipe/$recipeId')({
   loader: async ({ params }) => {
-    const response = await fetch(`${baseUrl}/recipe/${params.recipeId}`)
-    const recipe = (await response.json()) as Recipe
-    return recipe
+    return getRecipe(params.recipeId)
   },
   component: RecipePage,
 })
@@ -19,7 +16,7 @@ const roundToNearestSixteenth = (value: number) => {
 }
 
 function RecipePage() {
-  const { recipe } = Route.useLoaderData() as { recipe: Recipe }
+  const recipe = Route.useLoaderData()
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
@@ -28,14 +25,12 @@ function RecipePage() {
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
-      const response = await fetch(`${baseUrl}/recipe/${recipeId}`, {
-        method: 'DELETE',
-      })
-      if (response.ok) {
+      try {
+        await deleteRecipe(recipeId)
         navigate({ to: `/` })
-      } else {
+      } catch (error) {
         // Handle error
-        console.error('Failed to delete the recipe')
+        console.error('Failed to delete the recipe', error)
         alert('Failed to delete the recipe')
       }
     },
@@ -56,16 +51,11 @@ function RecipePage() {
   }
 
   const handleSaveIngredients = useCallback(async () => {
-    // TODO add route on backend
-    const response = await fetch(`${baseUrl}/recipe/${recipe.id}/ingredients`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(editedIngredients),
-    })
-    if (!response.ok) {
-      console.error('Failed to save ingredients')
+    try {
+      await updateRecipe(recipe.id, { ingredients: editedIngredients })
+    } catch (error) {
+      // Handle error
+      console.error('Failed to save ingredients', error)
       alert('Failed to save ingredients')
     }
   }, [editedIngredients, recipe.id])

@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as ShareIndexImport } from './routes/share/index'
 import { Route as RecipeRecipeIdImport } from './routes/recipe/$recipeId'
 
 // Create/Update Routes
@@ -19,6 +20,12 @@ import { Route as RecipeRecipeIdImport } from './routes/recipe/$recipeId'
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ShareIndexRoute = ShareIndexImport.update({
+  id: '/share/',
+  path: '/share/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecipeRecipeIdImport
       parentRoute: typeof rootRoute
     }
+    '/share/': {
+      id: '/share/'
+      path: '/share'
+      fullPath: '/share'
+      preLoaderRoute: typeof ShareIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,39 +68,46 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/recipe/$recipeId': typeof RecipeRecipeIdRoute
+  '/share': typeof ShareIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/recipe/$recipeId': typeof RecipeRecipeIdRoute
+  '/share': typeof ShareIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/recipe/$recipeId': typeof RecipeRecipeIdRoute
+  '/share/': typeof ShareIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/recipe/$recipeId'
+  fullPaths: '/' | '/recipe/$recipeId' | '/share'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/recipe/$recipeId'
-  id: '__root__' | '/' | '/recipe/$recipeId'
+  to: '/' | '/recipe/$recipeId' | '/share'
+  id: '__root__' | '/' | '/recipe/$recipeId' | '/share/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RecipeRecipeIdRoute: typeof RecipeRecipeIdRoute
+  ShareIndexRoute: typeof ShareIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RecipeRecipeIdRoute: RecipeRecipeIdRoute,
+  ShareIndexRoute: ShareIndexRoute,
 }
 
-export const routeTree = rootRoute._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* ROUTE_MANIFEST_START
 {
@@ -95,7 +116,8 @@ export const routeTree = rootRoute._addFileChildren(rootRouteChildren)._addFileT
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/recipe/$recipeId"
+        "/recipe/$recipeId",
+        "/share/"
       ]
     },
     "/": {
@@ -103,6 +125,9 @@ export const routeTree = rootRoute._addFileChildren(rootRouteChildren)._addFileT
     },
     "/recipe/$recipeId": {
       "filePath": "recipe/$recipeId.tsx"
+    },
+    "/share/": {
+      "filePath": "share/index.tsx"
     }
   }
 }

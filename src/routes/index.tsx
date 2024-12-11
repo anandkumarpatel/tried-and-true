@@ -1,43 +1,18 @@
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import React, { useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { createFileRoute } from '@tanstack/react-router'
-import { Recipe, RecipeRes } from '../types'
-import { useNavigate } from '@tanstack/react-router'
+import { listRecipes, scrape } from '../services/backend'
 import './index.css'
-
-const baseUrl = import.meta.env.VITE_BACKEND_URL
 
 export const Route = createFileRoute('/')({
   component: Home,
-  loader: async (): Promise<{ recipes: Recipe[] }> => {
-    const response = await fetch(`${baseUrl}/recipes`)
-    const recipes = (await response.json()) as RecipeRes
-    return recipes
-  },
+  loader: listRecipes,
 })
 
 function Home() {
-  const { recipes } = Route.useLoaderData() as { recipes: Recipe[] }
+  const recipes = Route.useLoaderData()
   const [url, setUrl] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const navigate = useNavigate()
-
-  const scrape = async (url: string): Promise<Recipe> => {
-    try {
-      const response = await fetch(`${baseUrl}/scrape`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      })
-      const data = await response.json()
-      return data.recipe
-    } catch (error) {
-      console.error('Error fetching recipe:', error)
-      throw error
-    }
-  }
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault()

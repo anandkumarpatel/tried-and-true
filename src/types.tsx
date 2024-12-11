@@ -29,4 +29,5 @@ export interface Direction {
   image?: string
 }
 
-export type RecipeRes = { recipes: Recipe[] }
+export type RecipesRes = { recipes: Recipe[] }
+export type RecipeRes = { recipe: Recipe }
