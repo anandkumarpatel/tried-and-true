@@ -195,10 +195,13 @@ app.post('/scrape', async (req, res) => {
     let html
     if (url.includes('instagram.com')) {
       log('Using Puppeteer for Instagram URL')
-      const browser = await puppeteer.launch({
-        executablePath: '/usr/bin/chromium-browser', // Ensure this path is correct
-        args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'], // Disable sandboxing
-      })
+      const browserOptions = {
+        args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
+      }
+      if (!process.env.DEBUG_LOG) {
+        browserOptions.executablePath = '/usr/bin/chromium-browser'
+      }
+      const browser = await puppeteer.launch(browserOptions)
       const page = await browser.newPage()
       await page.goto(url, { waitUntil: 'networkidle2' })
       html = await page.content()
