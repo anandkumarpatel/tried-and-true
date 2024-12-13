@@ -64,6 +64,21 @@ function RecipePage() {
     setEditedIngredients((prev) => prev.map((ingredient, i) => (i === index ? { ...ingredient, [name]: value } : ingredient)))
   }
 
+  const hasGroups = editedIngredients.some((ingredient) => ingredient.group)
+  const groupedIngredients = hasGroups
+    ? editedIngredients.reduce(
+        (acc, ingredient) => {
+          const group = ingredient.group || 'Other'
+          if (!acc[group]) {
+            acc[group] = []
+          }
+          acc[group].push(ingredient)
+          return acc
+        },
+        {} as Record<string, Ingredient[]>
+      )
+    : { Other: editedIngredients }
+
   return (
     <div className='recipe-page-container'>
       <div className='recipe-page'>
@@ -100,18 +115,23 @@ function RecipePage() {
         >
           {isEditing ? 'Done' : 'Edit'}
         </button>
-        <ul>
-          {editedIngredients.map((ingredient, index) => (
-            <IngredientLine
-              key={index}
-              ingredient={ingredient}
-              isEditing={isEditing}
-              onChange={(name, value) => handleIngredientChange(index, name, value)}
-              baseServings={recipe.servings}
-              currentServings={servings}
-            />
-          ))}
-        </ul>
+        {Object.keys(groupedIngredients).map((group) => (
+          <div key={group}>
+            {hasGroups && group !== 'Other' && <h4>{group}</h4>}
+            <ul>
+              {groupedIngredients[group].map((ingredient, index) => (
+                <IngredientLine
+                  key={index}
+                  ingredient={ingredient}
+                  isEditing={isEditing}
+                  onChange={(name, value) => handleIngredientChange(index, name, value)}
+                  baseServings={recipe.servings}
+                  currentServings={servings}
+                />
+              ))}
+            </ul>
+          </div>
+        ))}
         <h3>Directions</h3>
         <ol>
           {recipe.directions.map((direction, index) => (

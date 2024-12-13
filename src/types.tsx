@@ -22,6 +22,7 @@ export interface Ingredient {
   preparation?: string
   substitutions?: string
   notes?: string
+  group?: string
 }
 
 export interface Direction {

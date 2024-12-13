@@ -90,6 +90,10 @@ const aiOutputFormat = {
               type: 'string',
               description: 'The name of the ingredient.',
             },
+            group: {
+              type: 'string',
+              description: 'The group the ingredient belongs to (e.g. "for the sauce", "frosting").',
+            },
             preparation: {
               type: 'string',
               optional: true,
@@ -106,7 +110,7 @@ const aiOutputFormat = {
               description: 'Additional notes about the ingredient.',
             },
           },
-          required: ['amount', 'amountUnit', 'name'],
+          required: ['amount', 'amountUnit', 'name', 'group'],
           additionalProperties: false,
         },
       },
@@ -276,7 +280,7 @@ app.delete('/recipe/:id', (req, res) => {
 })
 
 async function extractRecipeFromText(text) {
-  const prompt = `Extract\n1. ingredients (substitutions, notes, and images are optional only add them if they are provided and preparation means how to cut or prepare the ingredient for example: diced, cubed, shredded, minced, ...etc)\n2. recipe instructions with photos if they are provided\n3. prep and cooking times\n4. title and title images\n5. Serving size: if there is a range, always pick the larger number\nfrom the following blog. Keep the ingredients and instructions the same, do not modify them. Only use text from the blog, do NOT make up your own.\n\n${text}`
+  const prompt = `Extract\n1. ingredients (substitutions, notes, and images are optional only add them if they are provided and preparation means how to cut or prepare the ingredient for example: diced, cubed, shredded, minced, ...etc). Set group if there are multiple parts like  "Sauce" or "Frosting".  \n2. recipe instructions with photos if they are provided\n3. prep and cooking times\n4. title and title images\n5. Serving size: if there is a range, always pick the larger number\nfrom the following blog. Keep the ingredients and instructions the same, do not modify them. Only use text from the blog, do NOT make up your own.\n\n${text}`
   log('Prompt:', prompt)
   try {
     const response = await openai.chat.completions.create({
