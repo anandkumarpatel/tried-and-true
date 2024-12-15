@@ -13,3 +13,7 @@
 - calorie counter
 - photo upload
 - substitution suggestions
+- add filter by ingredient 
+- add weekly schedule 
+- add add to Amazon cart
+
