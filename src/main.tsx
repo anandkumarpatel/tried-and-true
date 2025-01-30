@@ -33,6 +33,12 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const queryParams = new URLSearchParams(window.location.search)
+const url = queryParams.get('url')
+if (url && !window.location.href.includes('/share')) {
+  window.location.replace(`#/share?${queryParams.toString()}`)
+}
+
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
