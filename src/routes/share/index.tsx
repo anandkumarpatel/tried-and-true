@@ -22,13 +22,7 @@ function Share() {
   const [loading, setLoading] = useState(true)
   const needsRedirect = window.location.search && window.location.hash.endsWith('/share')
 
-  const finalUrl = [url, text, title].find((param) => {
-    try {
-      return param && new URL(param)
-    } catch {
-      return false
-    }
-  })
+  const finalUrl = [url, text, title].map((param) => param?.match(/https?:\/\/[^\s/$.?#].[^\s]*/)?.[0]).find((i) => i)
 
   useEffect(() => {
     if (needsRedirect) return
