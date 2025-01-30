@@ -35,7 +35,9 @@ declare module '@tanstack/react-router' {
 
 const queryParams = new URLSearchParams(window.location.search)
 const url = queryParams.get('url')
-if (url && !window.location.href.includes('/share')) {
+const text = queryParams.get('text')
+const title = queryParams.get('text')
+if ((url || text || title) && !window.location.href.includes('/share')) {
   window.location.replace(`#/share?${queryParams.toString()}`)
 }
 
