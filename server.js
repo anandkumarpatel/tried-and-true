@@ -274,10 +274,11 @@ app.get('/recipe/:id', (req, res) => {
 })
 
 app.post('/recipe/:id', (req, res) => {
-  log('Updating recipe:', req.params.id)
+  const { id } = req.params
+  log('Updating recipe:', id)
   const update = req.body
   try {
-    const current = recipeStorage.getRecipeById(req.params.id)
+    const current = recipeStorage.getRecipeById(id)
     if (!current) {
       res.status(404).send('Recipe not found')
     }
@@ -290,12 +291,49 @@ app.post('/recipe/:id', (req, res) => {
     if (update.notes && !current.originalNotes) {
       update.originalNotes = JSON.stringify(current.notes)
     }
-    recipeStorage.updateById(req.params.id, update)
+    recipeStorage.updateById(id, update)
 
     res.json({ recipe: update })
   } catch (error) {
-    console.error('Error getting recipe:', error)
-    res.status(500).send('Error getting recipe')
+    console.error('Error updating recipe:', error)
+    res.status(500).send('Error updating recipe')
+  }
+})
+
+app.post('/recipe/:id/revert/:key', (req, res) => {
+  const { id, key } = req.params
+  log('Updating recipe:', id)
+  try {
+    const current = recipeStorage.getRecipeById(id)
+    if (!current) {
+      throw new Error('Recipe not found')
+    }
+    if (key === 'ingredients') {
+      if (!current.originalIngredients) {
+        throw new Error('No original ingredients found')
+      }
+      current.ingredients = JSON.parse(current.originalIngredients)
+    } else if (key === 'directions') {
+      if (!current.originalDirections) {
+        throw new Error('No original directions found')
+      }
+
+      current.directions = JSON.parse(current.originalDirections)
+    } else if (key === 'notes') {
+      if (!current.originalNotes) {
+        throw new Error('No original notes found')
+      }
+      current.notes = JSON.parse(current.originalNotes)
+    } else {
+      throw new Error(`Invalid key ${key}`)
+    }
+
+    recipeStorage.updateById(id, current)
+
+    res.json({ recipe: current })
+  } catch (error) {
+    console.error('Error reverting recipe:', error)
+    res.status(500).send('Error reverting recipe')
   }
 })
 
