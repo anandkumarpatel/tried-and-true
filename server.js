@@ -300,43 +300,6 @@ app.post('/recipe/:id', (req, res) => {
   }
 })
 
-app.post('/recipe/:id/revert/:key', (req, res) => {
-  const { id, key } = req.params
-  log('Updating recipe:', id)
-  try {
-    const current = recipeStorage.getRecipeById(id)
-    if (!current) {
-      throw new Error('Recipe not found')
-    }
-    if (key === 'ingredients') {
-      if (!current.originalIngredients) {
-        throw new Error('No original ingredients found')
-      }
-      current.ingredients = JSON.parse(current.originalIngredients)
-    } else if (key === 'directions') {
-      if (!current.originalDirections) {
-        throw new Error('No original directions found')
-      }
-
-      current.directions = JSON.parse(current.originalDirections)
-    } else if (key === 'notes') {
-      if (!current.originalNotes) {
-        throw new Error('No original notes found')
-      }
-      current.notes = JSON.parse(current.originalNotes)
-    } else {
-      throw new Error(`Invalid key ${key}`)
-    }
-
-    recipeStorage.updateById(id, current)
-
-    res.json({ recipe: current })
-  } catch (error) {
-    console.error('Error reverting recipe:', error)
-    res.status(500).send('Error reverting recipe')
-  }
-})
-
 // Route to delete a recipe by id
 app.delete('/recipe/:id', (req, res) => {
   log('Deleting recipe:', req.params.id)

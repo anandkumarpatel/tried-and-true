@@ -66,6 +66,33 @@ function RecipePage() {
     [recipe.id]
   )
 
+  const handleRevert = (key: keyof Recipe) => {
+    if (key === 'ingredients') {
+      setEditedIngredients(JSON.parse(recipe.originalIngredients || '[]'))
+    }
+    if (key === 'notes') {
+      setEditedNotes(JSON.parse(recipe.originalNotes || '[]'))
+    }
+    if (key === 'directions') {
+      setEditedDirections(JSON.parse(recipe.originalDirections || '[]'))
+    }
+  }
+
+  const handleCancel = (key: keyof Recipe) => {
+    if (key === 'ingredients') {
+      setEditedIngredients(recipe.ingredients)
+      setIsEditingIngredients(false)
+    }
+    if (key === 'notes') {
+      setEditedNotes(recipe.notes || [])
+      setIsEditingNotes(false)
+    }
+    if (key === 'directions') {
+      setEditedDirections(recipe.directions)
+      setIsEditingDirections(false)
+    }
+  }
+
   const handleIngredientChange = (index: number, name: string, value: string | number) => {
     setEditedIngredients((prev) => prev.map((ingredient, i) => (i === index ? { ...ingredient, [name]: value } : ingredient)))
   }
@@ -145,6 +172,20 @@ function RecipePage() {
         >
           {isEditingIngredients ? 'Save' : 'Edit'}
         </button>
+
+        {isEditingIngredients && (
+          <>
+            <button onClick={() => handleCancel('ingredients')} className='revert-button'>
+              Cancel
+            </button>
+
+            {recipe.originalIngredients && (
+              <button onClick={() => handleRevert('ingredients')} className='revert-button'>
+                Show Original
+              </button>
+            )}
+          </>
+        )}
         {Object.keys(groupedIngredients).map((group) => (
           <div key={group}>
             {hasGroups && group !== 'Other' && <h4>{group}</h4>}
@@ -174,6 +215,19 @@ function RecipePage() {
         >
           {isEditingDirections ? 'Save' : 'Edit'}
         </button>
+        {isEditingDirections && (
+          <>
+            <button onClick={() => handleCancel('directions')} className='revert-button'>
+              Cancel
+            </button>
+
+            {recipe.originalDirections && (
+              <button onClick={() => handleRevert('directions')} className='revert-button'>
+                Show Original
+              </button>
+            )}
+          </>
+        )}
         <ol>
           {editedDirections.map((direction, index) => (
             <li key={index}>
@@ -213,6 +267,19 @@ function RecipePage() {
             >
               {isEditingNotes ? 'Save' : 'Edit'}
             </button>
+            {isEditingNotes && (
+              <>
+                <button onClick={() => handleCancel('notes')} className='revert-button'>
+                  Cancel
+                </button>
+
+                {recipe.originalNotes && (
+                  <button onClick={() => handleRevert('notes')} className='revert-button'>
+                    Show Original
+                  </button>
+                )}
+              </>
+            )}
             <ul>
               {editedNotes.map((note, index) => (
                 <li key={index}>

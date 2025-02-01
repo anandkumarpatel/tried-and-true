@@ -11,8 +11,11 @@ export interface Recipe {
   servings: number
   mainImage?: string
   ingredients: Ingredient[]
+  originalIngredients?: string
   directions: Direction[]
+  originalDirections?: string
   notes?: string[]
+  originalNotes?: string
 }
 
 export interface Ingredient {

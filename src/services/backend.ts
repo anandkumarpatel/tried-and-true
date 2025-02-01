@@ -41,20 +41,6 @@ export const deleteRecipe = async (recipeId: string): Promise<void> => {
   }
 }
 
-export const revertRecipe = async (recipeId: string, key: keyof Recipe): Promise<Recipe> => {
-  if (!key) {
-    throw new Error(`No key passed ${key}`)
-  }
-  const response = await fetch(`${baseUrl}/recipe/${recipeId}/revert/${key}`, {
-    method: 'POST',
-  })
-  if (!response.ok) {
-    throw new Error('Failed to delete the recipe')
-  }
-  const { recipe } = (await response.json()) as RecipeRes
-  return recipe
-}
-
 export const updateRecipe = async (recipeId: string, update: Partial<Recipe>): Promise<void> => {
   // TODO add route on backend
   const response = await fetch(`${baseUrl}/recipe/${recipeId}`, {
