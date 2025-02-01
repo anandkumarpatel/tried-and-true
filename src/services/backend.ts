@@ -43,14 +43,14 @@ export const deleteRecipe = async (recipeId: string): Promise<void> => {
 
 export const updateRecipe = async (recipeId: string, update: Partial<Recipe>): Promise<void> => {
   // TODO add route on backend
-  const response = await fetch(`${baseUrl}/recipe/${recipeId}/ingredients`, {
-    method: 'PUT',
+  const response = await fetch(`${baseUrl}/recipe/${recipeId}`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(update),
   })
   if (!response.ok) {
-    throw new Error('Failed to save ingredients')
+    throw new Error('Failed to save Recipe')
   }
 }

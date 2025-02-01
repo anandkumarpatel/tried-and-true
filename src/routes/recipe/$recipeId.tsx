@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
 import { deleteRecipe, getRecipe, updateRecipe } from '../../services/backend'
-import { Ingredient } from '../../types'
+import { Ingredient, Recipe } from '../../types'
 import './$recipeId.css'
 
 export const Route = createFileRoute('/recipe/$recipeId')({
@@ -22,6 +22,7 @@ function RecipePage() {
   const [servings, setServings] = useState(recipe.servings)
   const [isEditing, setIsEditing] = useState(false)
   const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
+  const [editedNotes, setEditedNotes] = useState(recipe.notes || [])
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -50,18 +51,32 @@ function RecipePage() {
     setServings((prevServings) => Math.max(1, prevServings + delta))
   }
 
-  const handleSaveIngredients = useCallback(async () => {
-    try {
-      await updateRecipe(recipe.id, { ingredients: editedIngredients })
-    } catch (error) {
-      // Handle error
-      console.error('Failed to save ingredients', error)
-      alert('Failed to save ingredients')
-    }
-  }, [editedIngredients, recipe.id])
+  const handleSave = useCallback(
+    async (update: Partial<Recipe>) => {
+      try {
+        await updateRecipe(recipe.id, update)
+      } catch (error) {
+        console.error('Failed to save recipe', error)
+        alert('Failed to save recipe, please try again later')
+      }
+    },
+    [recipe.id]
+  )
 
   const handleIngredientChange = (index: number, name: string, value: string | number) => {
     setEditedIngredients((prev) => prev.map((ingredient, i) => (i === index ? { ...ingredient, [name]: value } : ingredient)))
+  }
+
+  const handleNoteChange = (index: number, value: string) => {
+    setEditedNotes((prev) => prev.map((note, i) => (i === index ? value : note)))
+  }
+
+  const handleAddNote = () => {
+    setEditedNotes((prev) => [...prev, ''])
+  }
+
+  const handleRemoveNote = (index: number) => {
+    setEditedNotes((prev) => prev.filter((_, i) => i !== index))
   }
 
   const hasGroups = editedIngredients.some((ingredient) => ingredient.group)
@@ -107,7 +122,7 @@ function RecipePage() {
         <button
           onClick={() => {
             if (isEditing) {
-              handleSaveIngredients()
+              handleSave({ ingredients: editedIngredients })
             }
             setIsEditing(!isEditing)
           }}
@@ -144,11 +159,32 @@ function RecipePage() {
         {recipe.notes?.length && recipe.notes.length > 0 ? (
           <>
             <h3>Notes</h3>
+            <button
+              onClick={() => {
+                if (isEditing) {
+                  handleSave({ notes: editedNotes })
+                }
+                setIsEditing(!isEditing)
+              }}
+              className='edit-button'
+            >
+              {isEditing ? 'Done' : 'Edit'}
+            </button>
             <ul>
-              {recipe.notes.map((note, index) => (
-                <li key={index}>{note}</li>
+              {editedNotes.map((note, index) => (
+                <li key={index}>
+                  {isEditing ? (
+                    <>
+                      <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} placeholder='Note' rows={4} cols={50} />
+                      <button onClick={() => handleRemoveNote(index)}>Remove</button>
+                    </>
+                  ) : (
+                    note
+                  )}
+                </li>
               ))}
             </ul>
+            {isEditing && <button onClick={handleAddNote}>Add Note</button>}
           </>
         ) : null}
 

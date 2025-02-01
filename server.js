@@ -180,6 +180,12 @@ class RecipeStorage {
     return this.recipes.find((recipe) => recipe.id === id)
   }
 
+  updateById(id, update) {
+    const old = this.recipes.find((recipe) => recipe.id === id)
+    Object.assign(old, update)
+    return
+  }
+
   deleteRecipeById(id) {
     const initialLength = this.recipes.length
     this.recipes = this.recipes.filter((recipe) => recipe.id !== id)
@@ -261,6 +267,26 @@ app.get('/recipe/:id', (req, res) => {
     } else {
       res.status(404).send('Recipe not found')
     }
+  } catch (error) {
+    console.error('Error getting recipe:', error)
+    res.status(500).send('Error getting recipe')
+  }
+})
+
+app.post('/recipe/:id', (req, res) => {
+  log('Updating recipe:', req.params.id)
+  const recipe = req.body
+  try {
+    const current = recipeStorage.getRecipeById(req.params.id)
+    if (!current) {
+      res.status(404).send('Recipe not found')
+    }
+    if (recipe.ingredients && !current.originalIngredients) {
+      current.originalIngredients = JSON.stringify(current.ingredients)
+    }
+    recipeStorage.updateById(req.params.id, recipe)
+
+    res.json({ recipe })
   } catch (error) {
     console.error('Error getting recipe:', error)
     res.status(500).send('Error getting recipe')
