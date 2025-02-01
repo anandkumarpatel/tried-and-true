@@ -23,6 +23,7 @@ function RecipePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
   const [editedNotes, setEditedNotes] = useState(recipe.notes || [])
+  const [editedDirections, setEditedDirections] = useState(recipe.directions)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -77,6 +78,18 @@ function RecipePage() {
 
   const handleRemoveNote = (index: number) => {
     setEditedNotes((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDirectionChange = (index: number, name: string, value: string) => {
+    setEditedDirections((prev) => prev.map((direction, i) => (i === index ? { ...direction, [name]: value } : direction)))
+  }
+
+  const handleAddDirection = () => {
+    setEditedDirections((prev) => [...prev, { instruction: '', image: '' }])
+  }
+
+  const handleRemoveDirection = (index: number) => {
+    setEditedDirections((prev) => prev.filter((_, i) => i !== index))
   }
 
   const hasGroups = editedIngredients.some((ingredient) => ingredient.group)
@@ -148,14 +161,42 @@ function RecipePage() {
           </div>
         ))}
         <h3>Directions</h3>
+        <button
+          onClick={() => {
+            if (isEditing) {
+              handleSave({ directions: editedDirections })
+            }
+            setIsEditing(!isEditing)
+          }}
+          className='edit-button'
+        >
+          {isEditing ? 'Done' : 'Edit'}
+        </button>
         <ol>
-          {recipe.directions.map((direction, index) => (
+          {editedDirections.map((direction, index) => (
             <li key={index}>
-              {direction.instruction}
-              {direction.image && <img src={direction.image} alt={`Step ${index + 1}`} className='responsive-image' />}
+              {isEditing ? (
+                <>
+                  <textarea
+                    value={direction.instruction}
+                    onChange={(e) => handleDirectionChange(index, 'instruction', e.target.value)}
+                    placeholder='Instruction'
+                    rows={4}
+                    cols={50}
+                  />
+                  <input type='text' value={direction.image} onChange={(e) => handleDirectionChange(index, 'image', e.target.value)} placeholder='Image URL' />
+                  <button onClick={() => handleRemoveDirection(index)}>Remove</button>
+                </>
+              ) : (
+                <>
+                  {direction.instruction}
+                  {direction.image && <img src={direction.image} alt={`Step ${index + 1}`} className='responsive-image' />}
+                </>
+              )}
             </li>
           ))}
         </ol>
+        {isEditing && <button onClick={handleAddDirection}>Add Direction</button>}
         {recipe.notes?.length && recipe.notes.length > 0 ? (
           <>
             <h3>Notes</h3>
