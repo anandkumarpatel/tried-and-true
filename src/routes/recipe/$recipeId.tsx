@@ -20,10 +20,12 @@ function RecipePage() {
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
-  const [isEditing, setIsEditing] = useState(false)
   const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
   const [editedNotes, setEditedNotes] = useState(recipe.notes || [])
   const [editedDirections, setEditedDirections] = useState(recipe.directions)
+  const [isEditingIngredients, setIsEditingIngredients] = useState(false)
+  const [isEditingNotes, setIsEditingNotes] = useState(false)
+  const [isEditingDirections, setIsEditingDirections] = useState(false)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -134,14 +136,14 @@ function RecipePage() {
         <h3>Ingredients</h3>
         <button
           onClick={() => {
-            if (isEditing) {
+            if (isEditingIngredients) {
               handleSave({ ingredients: editedIngredients })
             }
-            setIsEditing(!isEditing)
+            setIsEditingIngredients(!isEditingIngredients)
           }}
           className='edit-button'
         >
-          {isEditing ? 'Done' : 'Edit'}
+          {isEditingIngredients ? 'Save' : 'Edit'}
         </button>
         {Object.keys(groupedIngredients).map((group) => (
           <div key={group}>
@@ -151,7 +153,7 @@ function RecipePage() {
                 <IngredientLine
                   key={index}
                   ingredient={ingredient}
-                  isEditing={isEditing}
+                  isEditing={isEditingIngredients}
                   onChange={(name, value) => handleIngredientChange(index, name, value)}
                   baseServings={recipe.servings}
                   currentServings={servings}
@@ -163,19 +165,19 @@ function RecipePage() {
         <h3>Directions</h3>
         <button
           onClick={() => {
-            if (isEditing) {
+            if (isEditingDirections) {
               handleSave({ directions: editedDirections })
             }
-            setIsEditing(!isEditing)
+            setIsEditingDirections(!isEditingDirections)
           }}
           className='edit-button'
         >
-          {isEditing ? 'Done' : 'Edit'}
+          {isEditingDirections ? 'Save' : 'Edit'}
         </button>
         <ol>
           {editedDirections.map((direction, index) => (
             <li key={index}>
-              {isEditing ? (
+              {isEditingDirections ? (
                 <>
                   <textarea
                     value={direction.instruction}
@@ -196,25 +198,25 @@ function RecipePage() {
             </li>
           ))}
         </ol>
-        {isEditing && <button onClick={handleAddDirection}>Add Direction</button>}
+        {isEditingDirections && <button onClick={handleAddDirection}>Add Direction</button>}
         {recipe.notes?.length && recipe.notes.length > 0 ? (
           <>
             <h3>Notes</h3>
             <button
               onClick={() => {
-                if (isEditing) {
+                if (isEditingNotes) {
                   handleSave({ notes: editedNotes })
                 }
-                setIsEditing(!isEditing)
+                setIsEditingNotes(!isEditingNotes)
               }}
               className='edit-button'
             >
-              {isEditing ? 'Done' : 'Edit'}
+              {isEditingNotes ? 'Save' : 'Edit'}
             </button>
             <ul>
               {editedNotes.map((note, index) => (
                 <li key={index}>
-                  {isEditing ? (
+                  {isEditingNotes ? (
                     <>
                       <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} placeholder='Note' rows={4} cols={50} />
                       <button onClick={() => handleRemoveNote(index)}>Remove</button>
@@ -225,7 +227,7 @@ function RecipePage() {
                 </li>
               ))}
             </ul>
-            {isEditing && <button onClick={handleAddNote}>Add Note</button>}
+            {isEditingNotes && <button onClick={handleAddNote}>Add Note</button>}
           </>
         ) : null}
 
