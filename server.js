@@ -275,18 +275,24 @@ app.get('/recipe/:id', (req, res) => {
 
 app.post('/recipe/:id', (req, res) => {
   log('Updating recipe:', req.params.id)
-  const recipe = req.body
+  const update = req.body
   try {
     const current = recipeStorage.getRecipeById(req.params.id)
     if (!current) {
       res.status(404).send('Recipe not found')
     }
-    if (recipe.ingredients && !current.originalIngredients) {
-      current.originalIngredients = JSON.stringify(current.ingredients)
+    if (update.ingredients && !current.originalIngredients) {
+      update.originalIngredients = JSON.stringify(current.ingredients)
     }
-    recipeStorage.updateById(req.params.id, recipe)
+    if (update.directions && !current.originalDirections) {
+      update.originalDirections = JSON.stringify(current.directions)
+    }
+    if (update.notes && !current.originalNotes) {
+      update.originalNotes = JSON.stringify(current.notes)
+    }
+    recipeStorage.updateById(req.params.id, update)
 
-    res.json({ recipe })
+    res.json({ recipe: update })
   } catch (error) {
     console.error('Error getting recipe:', error)
     res.status(500).send('Error getting recipe')
