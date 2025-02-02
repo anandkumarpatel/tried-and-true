@@ -186,6 +186,25 @@ class RecipeStorage {
     return
   }
 
+  findRecipesWithSimilarIngredients(id) {
+    const recipe = this.getRecipeById(id)
+    if (!recipe) {
+      return []
+    }
+    const similarRecipes = this.recipes.map((r) => {
+      if (r.id === id) {
+        return false
+      }
+      return {
+        ...r,
+        similarIngredients: r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name),
+      }
+    })
+
+    similarRecipes.sort((a, b) => b.similarIngredients.length - a.similarIngredients.length)
+    return similarRecipes
+  }
+
   deleteRecipeById(id) {
     const initialLength = this.recipes.length
     this.recipes = this.recipes.filter((recipe) => recipe.id !== id)
@@ -259,6 +278,22 @@ app.get('/recipes', (req, res) => {
 
 // Route to get a recipe by id
 app.get('/recipe/:id', (req, res) => {
+  log('Getting recipe:', req.params.id)
+  try {
+    const recipe = recipeStorage.getRecipeById(req.params.id)
+    if (recipe) {
+      res.json({ recipe })
+    } else {
+      res.status(404).send('Recipe not found')
+    }
+  } catch (error) {
+    console.error('Error getting recipe:', error)
+    res.status(500).send('Error getting recipe')
+  }
+})
+
+// get reciplies with similar ingredients
+app.get('/recipe/:id/similarIngredients', (req, res) => {
   log('Getting recipe:', req.params.id)
   try {
     const recipe = recipeStorage.getRecipeById(req.params.id)
