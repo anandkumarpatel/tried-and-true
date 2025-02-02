@@ -11,7 +11,7 @@ export const Route = createRootRoute({
         </Link>{' '}
       </div>
       <Outlet />
-      <TanStackRouterDevtools />
+      {window.location.hostname === 'localhost' && <TanStackRouterDevtools />}
     </>
   ),
 })
