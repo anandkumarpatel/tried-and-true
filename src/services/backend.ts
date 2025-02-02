@@ -26,9 +26,9 @@ export const listRecipes = async (): Promise<Recipe[]> => {
   return recipes
 }
 
-export const getRecipe = async (recipeId: string): Promise<Recipe> => {
+export const getRecipe = async (recipeId: string): Promise<RecipeRes> => {
   const response = await fetch(`${baseUrl}/recipe/${recipeId}`)
-  const { recipe } = (await response.json()) as RecipeRes
+  const recipe = (await response.json()) as RecipeRes
   return recipe
 }
 

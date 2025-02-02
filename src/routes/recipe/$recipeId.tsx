@@ -16,7 +16,7 @@ const roundToNearestSixteenth = (value: number) => {
 }
 
 function RecipePage() {
-  const recipe = Route.useLoaderData()
+  const { recipe, similarRecipes } = Route.useLoaderData()
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
@@ -135,6 +135,15 @@ function RecipePage() {
         {} as Record<string, Ingredient[]>
       )
     : { Other: editedIngredients }
+
+  const getMatchingIngredients = (recipe1: Recipe, recipe2: Recipe) => {
+    const ingredients1 = new Set(recipe1.ingredients.map((ing) => ing.name.toLowerCase()))
+    return recipe2.ingredients.filter((ing) => ingredients1.has(ing.name.toLowerCase())).map((ing) => ing.name)
+  }
+
+  const handleCardClick = (recipeId: string) => {
+    navigate({ to: `/recipe/${recipeId}` })
+  }
 
   return (
     <div className='recipe-page-container'>
@@ -304,6 +313,16 @@ function RecipePage() {
             {recipe.sourceUrl}
           </a>
         </p>
+        <h3>Similar Recipes</h3>
+        <div className='similar-recipes-container'>
+          {similarRecipes.map((similarRecipe) => (
+            <div key={similarRecipe.id} className='similar-recipe-card' onClick={() => handleCardClick(similarRecipe.id)}>
+              <h4>{similarRecipe.title}</h4>
+              {similarRecipe.mainImage && <img src={similarRecipe.mainImage} alt={similarRecipe.title} className='responsive-image' />}
+              <p>Matching Ingredients: {getMatchingIngredients(recipe, similarRecipe).join(', ')}</p>
+            </div>
+          ))}
+        </div>
         <button className='delete-button' onClick={handleDeleteClick}>
           {confirmDelete ? 'Really Delete?' : 'Delete'}
         </button>

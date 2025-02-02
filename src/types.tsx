@@ -34,4 +34,4 @@ export interface Direction {
 }
 
 export type RecipesRes = { recipes: Recipe[] }
-export type RecipeRes = { recipe: Recipe }
+export type RecipeRes = { recipe: Recipe; similarRecipes: Recipe[] }

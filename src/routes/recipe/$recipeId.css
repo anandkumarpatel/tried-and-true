@@ -56,3 +56,26 @@
 .servings-count.modified {
   background-color: lightyellow;
 }
+
+.similar-recipes-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.similar-recipe-card {
+  flex: 0 0 auto;
+  width: 200px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer; /* Add cursor pointer */
+}
+
+.similar-recipe-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
