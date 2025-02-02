@@ -192,12 +192,11 @@ class RecipeStorage {
       return []
     }
     const similarRecipes = this.recipes.map((r) => {
-      if (r.id === id) {
-        return false
-      }
+      const similarIngredients = r.id === id ? [] : r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name)
+
       return {
         ...r,
-        similarIngredients: r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name),
+        similarIngredients,
       }
     })
 
@@ -281,8 +280,9 @@ app.get('/recipe/:id', (req, res) => {
   log('Getting recipe:', req.params.id)
   try {
     const recipe = recipeStorage.getRecipeById(req.params.id)
+    const similarRecipes = recipeStorage.findRecipesWithSimilarIngredients(req.params.id)
     if (recipe) {
-      res.json({ recipe })
+      res.json({ recipe, similarRecipes })
     } else {
       res.status(404).send('Recipe not found')
     }
