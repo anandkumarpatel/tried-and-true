@@ -191,14 +191,16 @@ class RecipeStorage {
     if (!recipe) {
       return []
     }
-    const similarRecipes = this.recipes.map((r) => {
-      const similarIngredients = r.id === id ? [] : r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name)
+    const similarRecipes = this.recipes
+      .map((r) => {
+        const similarIngredients = r.id === id ? [] : r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name)
 
-      return {
-        ...r,
-        similarIngredients,
-      }
-    })
+        return {
+          ...r,
+          similarIngredients: [...new Set(similarIngredients)],
+        }
+      })
+      .filter((r) => r.similarIngredients.length > 0)
 
     similarRecipes.sort((a, b) => b.similarIngredients.length - a.similarIngredients.length)
     return similarRecipes

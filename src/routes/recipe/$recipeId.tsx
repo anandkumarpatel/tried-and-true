@@ -319,7 +319,7 @@ function RecipePage() {
             <div key={similarRecipe.id} className='similar-recipe-card' onClick={() => handleCardClick(similarRecipe.id)}>
               <h4>{similarRecipe.title}</h4>
               {similarRecipe.mainImage && <img src={similarRecipe.mainImage} alt={similarRecipe.title} className='responsive-image' />}
-              <p>Matching Ingredients: {getMatchingIngredients(recipe, similarRecipe).join(', ')}</p>
+              <p>Matching Ingredients: {similarRecipe.similarIngredients.join(', ')}</p>
             </div>
           ))}
         </div>
