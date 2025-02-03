@@ -13,6 +13,9 @@ export const scrape = async (url: string, controller = new AbortController()): P
       signal: controller.signal,
     })
     const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data?.error || 'unknown error')
+    }
     return data.recipe
   } catch (error) {
     console.error('Error fetching recipe:', error)

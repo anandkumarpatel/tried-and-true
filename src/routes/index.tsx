@@ -24,8 +24,12 @@ function Home() {
     try {
       const recipe = await scrape(url)
       navigate({ to: `/recipe/${recipe.id}` })
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching recipe:', error)
+      if ((error as Error)?.message.includes('Not a recipe')) {
+        return alert('Not a recipe, please try another URL')
+      }
+
       alert('Error saving recipe, try again')
     } finally {
       setLoading(false)

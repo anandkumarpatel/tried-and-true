@@ -193,7 +193,7 @@ class RecipeStorage {
     }
     const similarRecipes = this.recipes
       .map((r) => {
-        const similarIngredients = r.id === id ? [] : r.ingredients.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name)).map((i) => i.name)
+        const similarIngredients = r.id === id ? [] : r?.ingredients?.filter((i) => recipe.ingredients.some((ri) => ri.name === i.name))?.map((i) => i.name) || []
 
         return {
           ...r,
@@ -261,7 +261,7 @@ app.post('/scrape', async (req, res) => {
     res.json({ recipe: newRecipe })
   } catch (error) {
     console.error('Error processing HTML:', error)
-    res.status(500).send('Error processing HTML')
+    res.status(500).send({ error: `Error processing HTML ${error}` })
   }
 })
 
@@ -273,7 +273,7 @@ app.get('/recipes', (req, res) => {
     res.json({ recipes })
   } catch (error) {
     console.error('Error getting recipes:', error)
-    res.status(500).send('Error getting recipes')
+    res.status(500).send({ error: 'Error getting recipes' })
   }
 })
 
@@ -350,7 +350,19 @@ app.delete('/recipe/:id', (req, res) => {
 })
 
 async function extractRecipeFromText(text) {
-  const prompt = `Extract\n1. ingredients (substitutions, notes, and images are optional only add them if they are provided and preparation means how to cut or prepare the ingredient for example: diced, cubed, shredded, minced, ...etc). Set group if there are multiple parts like  "Sauce" or "Frosting".  \n2. recipe instructions with photos if they are provided\n3. prep and cooking times\n4. title and title images\n5. Serving size: if there is a range, always pick the larger number\nfrom the following blog. Keep the ingredients and instructions the same, do not modify them. Only use text from the blog, do NOT make up your own.\n\n${text}`
+  const prompt = `Extract the following information only if the provided text contains a recipe. If no recipe is found, return an empty response.
+
+1. Ingredients (include substitutions, notes, and images **only if provided**. Include preparation details such as diced, cubed, shredded, minced, etc. If ingredients are categorized into groups like "Sauce" or "Frosting," maintain these groupings).
+2. Recipe instructions (include photos **only if provided**).
+3. Preparation and cooking times.
+4. Title and title images.
+5. Serving size (if a range is given, always select the larger number).
+
+Strictly use **only** the text from the blog. **Do NOT generate, infer, or modify** any ingredients, instructions, or other recipe details. If no recipe-related content is found in the text, return an empty response.
+
+Input:
+${text}`
+
   log('Prompt:', prompt)
   try {
     const response = await openai.chat.completions.create({
@@ -377,7 +389,12 @@ async function extractRecipeFromText(text) {
     if (!out) {
       throw new Error('AI could not extract recipe')
     }
-    return JSON.parse(out)
+    console.log('AI Output:', out)
+    const parsed = JSON.parse(out)
+    if (!parsed.ingredients) {
+      throw new Error('Not a recipe')
+    }
+    return parsed
   } catch (error) {
     console.error('Error extracting recipe:', error)
     throw error
