@@ -5,16 +5,19 @@
   min-height: 100vh;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  overflow: hidden; /* Prevent content from leaking off the sides */
 }
 
 .recipe-page {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   padding: 20px;
-  max-width: 800px;
+  max-width: 100vw; /* Set max-width to screen size */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%; /* Ensure the content fits within the page */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .responsive-image {
