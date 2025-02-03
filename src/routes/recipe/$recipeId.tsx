@@ -136,11 +136,6 @@ function RecipePage() {
       )
     : { Other: editedIngredients }
 
-  const getMatchingIngredients = (recipe1: Recipe, recipe2: Recipe) => {
-    const ingredients1 = new Set(recipe1.ingredients.map((ing) => ing.name.toLowerCase()))
-    return recipe2.ingredients.filter((ing) => ingredients1.has(ing.name.toLowerCase())).map((ing) => ing.name)
-  }
-
   const handleCardClick = (recipeId: string) => {
     navigate({ to: `/recipe/${recipeId}` })
   }
