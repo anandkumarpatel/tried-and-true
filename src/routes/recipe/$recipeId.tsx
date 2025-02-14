@@ -257,50 +257,51 @@ function RecipePage() {
           ))}
         </ol>
         {isEditingDirections && <button onClick={handleAddDirection}>Add Direction</button>}
-        {recipe.notes?.length && recipe.notes.length > 0 ? (
-          <>
-            <h3>Notes</h3>
-            <button
-              onClick={() => {
-                if (isEditingNotes) {
-                  handleSave({ notes: editedNotes })
-                }
-                setIsEditingNotes(!isEditingNotes)
-              }}
-              className='edit-button'
-            >
-              {isEditingNotes ? 'Save' : 'Edit'}
-            </button>
-            {isEditingNotes && (
-              <>
-                <button onClick={() => handleCancel('notes')} className='revert-button'>
-                  Cancel
-                </button>
 
-                {recipe.originalNotes && (
-                  <button onClick={() => handleRevert('notes')} className='revert-button'>
-                    Show Original
-                  </button>
-                )}
-              </>
+        <h3>Notes</h3>
+        <button
+          onClick={() => {
+            if (isEditingNotes) {
+              handleSave({ notes: editedNotes })
+            } else {
+              if (!editedNotes?.length) {
+                handleAddNote()
+              }
+            }
+            setIsEditingNotes(!isEditingNotes)
+          }}
+          className='edit-button'
+        >
+          {isEditingNotes ? 'Save' : 'Edit'}
+        </button>
+        {isEditingNotes && (
+          <>
+            <button onClick={() => handleCancel('notes')} className='revert-button'>
+              Cancel
+            </button>
+
+            {recipe.originalNotes && (
+              <button onClick={() => handleRevert('notes')} className='revert-button'>
+                Show Original
+              </button>
             )}
-            <ul>
-              {editedNotes.map((note, index) => (
-                <li key={index}>
-                  {isEditingNotes ? (
-                    <>
-                      <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} placeholder='Note' rows={4} cols={50} />
-                      <button onClick={() => handleRemoveNote(index)}>Remove</button>
-                    </>
-                  ) : (
-                    note
-                  )}
-                </li>
-              ))}
-            </ul>
-            {isEditingNotes && <button onClick={handleAddNote}>Add Note</button>}
           </>
-        ) : null}
+        )}
+        <ul>
+          {editedNotes.map((note, index) => (
+            <li key={index}>
+              {isEditingNotes ? (
+                <>
+                  <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} placeholder='Note' rows={4} cols={50} />
+                  <button onClick={() => handleRemoveNote(index)}>Remove</button>
+                </>
+              ) : (
+                note
+              )}
+            </li>
+          ))}
+        </ul>
+        {isEditingNotes && <button onClick={handleAddNote}>Add Note</button>}
 
         <p>
           Source:{' '}
