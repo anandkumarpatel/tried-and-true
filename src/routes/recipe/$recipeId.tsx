@@ -23,9 +23,11 @@ function RecipePage() {
   const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
   const [editedNotes, setEditedNotes] = useState(recipe.notes || [])
   const [editedDirections, setEditedDirections] = useState(recipe.directions)
+  const [editedTags, setEditedTags] = useState(recipe.tags || [])
   const [isEditingIngredients, setIsEditingIngredients] = useState(false)
   const [isEditingNotes, setIsEditingNotes] = useState(false)
   const [isEditingDirections, setIsEditingDirections] = useState(false)
+  const [isEditingTags, setIsEditingTags] = useState(false)
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -91,6 +93,10 @@ function RecipePage() {
       setEditedDirections(recipe.directions)
       setIsEditingDirections(false)
     }
+    if (key === 'tags') {
+      setEditedTags(recipe.tags || [])
+      setIsEditingTags(false)
+    }
   }
 
   const handleIngredientChange = (index: number, name: string, value: string | number) => {
@@ -119,6 +125,18 @@ function RecipePage() {
 
   const handleRemoveDirection = (index: number) => {
     setEditedDirections((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleTagChange = (index: number, value: string) => {
+    setEditedTags((prev) => prev.map((tag, i) => (i === index ? value : tag)))
+  }
+
+  const handleAddTag = () => {
+    setEditedTags((prev) => [...prev, ''])
+  }
+
+  const handleRemoveTag = (index: number) => {
+    setEditedTags((prev) => prev.filter((_, i) => i !== index))
   }
 
   const hasGroups = editedIngredients.some((ingredient) => ingredient.group)
@@ -302,6 +320,39 @@ function RecipePage() {
           ))}
         </ul>
         {isEditingNotes && <button onClick={handleAddNote}>Add Note</button>}
+
+        <h3>Tags</h3>
+        <button
+          onClick={() => {
+            if (isEditingTags) {
+              handleSave({ tags: editedTags })
+            }
+            setIsEditingTags(!isEditingTags)
+          }}
+          className='edit-button'
+        >
+          {isEditingTags ? 'Save' : 'Edit'}
+        </button>
+        {isEditingTags && (
+          <button onClick={() => handleCancel('tags')} className='revert-button'>
+            Cancel
+          </button>
+        )}
+        <ul>
+          {editedTags.map((tag, index) => (
+            <li key={index}>
+              {isEditingTags ? (
+                <>
+                  <input type='text' value={tag} onChange={(e) => handleTagChange(index, e.target.value)} placeholder='Tag' />
+                  <button onClick={() => handleRemoveTag(index)}>Remove</button>
+                </>
+              ) : (
+                tag
+              )}
+            </li>
+          ))}
+        </ul>
+        {isEditingTags && <button onClick={handleAddTag}>Add Tag</button>}
 
         <p>
           Source:{' '}

@@ -63,6 +63,15 @@ function Home() {
                     {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} width='100' className='recipe-image' />}
                     <div className='recipe-text'>
                       <h3>{recipe.title}</h3>
+                      {recipe.tags && (
+                        <div className='tags'>
+                          {recipe.tags.map((tag, index) => (
+                            <span key={index} className='tag'>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>

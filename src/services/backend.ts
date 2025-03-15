@@ -45,7 +45,6 @@ export const deleteRecipe = async (recipeId: string): Promise<void> => {
 }
 
 export const updateRecipe = async (recipeId: string, update: Partial<Recipe>): Promise<void> => {
-  // TODO add route on backend
   const response = await fetch(`${baseUrl}/recipe/${recipeId}`, {
     method: 'POST',
     headers: {

@@ -16,6 +16,7 @@ export interface Recipe {
   originalDirections?: string
   notes?: string[]
   originalNotes?: string
+  tags?: string[]
 }
 
 export interface Ingredient {
