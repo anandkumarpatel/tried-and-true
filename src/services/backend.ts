@@ -56,3 +56,9 @@ export const updateRecipe = async (recipeId: string, update: Partial<Recipe>): P
     throw new Error('Failed to save Recipe')
   }
 }
+
+export const getTags = async (): Promise<string[]> => {
+  const response = await fetch(`${baseUrl}/tags`)
+  const { tags } = await response.json()
+  return tags
+}

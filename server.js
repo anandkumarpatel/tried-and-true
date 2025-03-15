@@ -213,6 +213,14 @@ class RecipeStorage {
       this.saveRecipes()
     }
   }
+
+  getAllTags() {
+    const tags = new Set()
+    this.recipes.forEach((recipe) => {
+      ;(recipe.tags || []).forEach((tag) => tags.add(tag))
+    })
+    return Array.from(tags)
+  }
 }
 
 const recipeStorage = new RecipeStorage()
@@ -346,6 +354,17 @@ app.delete('/recipe/:id', (req, res) => {
   } catch (error) {
     console.error('Error deleting recipe:', error)
     res.status(500).send('Error deleting recipe')
+  }
+})
+
+app.get('/tags', (req, res) => {
+  log('Getting all tags')
+  try {
+    const tags = recipeStorage.getAllTags()
+    res.json({ tags })
+  } catch (error) {
+    console.error('Error getting tags:', error)
+    res.status(500).send({ error: 'Error getting tags' })
   }
 })
 

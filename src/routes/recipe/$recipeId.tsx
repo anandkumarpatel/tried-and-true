@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
-import { deleteRecipe, getRecipe, updateRecipe } from '../../services/backend'
+import { deleteRecipe, getRecipe, getTags, updateRecipe } from '../../services/backend'
 import { Ingredient, Recipe } from '../../types'
 import './$recipeId.css'
 
 export const Route = createFileRoute('/recipe/$recipeId')({
   loader: async ({ params }) => {
-    return getRecipe(params.recipeId)
+    return {
+      recipe: await getRecipe(params.recipeId),
+      allTags: await getTags(),
+    }
   },
   component: RecipePage,
 })
@@ -16,7 +19,10 @@ const roundToNearestSixteenth = (value: number) => {
 }
 
 function RecipePage() {
-  const { recipe, similarRecipes } = Route.useLoaderData()
+  const {
+    recipe: { recipe, similarRecipes },
+    allTags,
+  } = Route.useLoaderData()
   const navigate = useNavigate()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
@@ -28,6 +34,7 @@ function RecipePage() {
   const [isEditingNotes, setIsEditingNotes] = useState(false)
   const [isEditingDirections, setIsEditingDirections] = useState(false)
   const [isEditingTags, setIsEditingTags] = useState(false)
+  const [tags, setTags] = useState<string[]>(allTags || [])
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
@@ -129,6 +136,11 @@ function RecipePage() {
 
   const handleTagChange = (index: number, value: string) => {
     setEditedTags((prev) => prev.map((tag, i) => (i === index ? value : tag)))
+  }
+
+  const handleNewTagBlur = (index: number, value: string) => {
+    handleTagChange(index, value)
+    setTags((prev) => [...prev, value])
   }
 
   const handleAddTag = () => {
@@ -343,7 +355,22 @@ function RecipePage() {
             <li key={index}>
               {isEditingTags ? (
                 <>
-                  <input type='text' value={tag} onChange={(e) => handleTagChange(index, e.target.value)} placeholder='Tag' />
+                  {tag && tag !== 'newValue' ? (
+                    tag
+                  ) : (
+                    <select value={tag} onChange={(e) => handleTagChange(index, e.target.value)}>
+                      <option value=''>Select a tag</option>
+                      {tags
+                        .filter((t) => !editedTags.includes(t))
+                        .map((t, i) => (
+                          <option key={i} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      <option value='newValue'>Add new tag</option>
+                    </select>
+                  )}
+                  {tag === 'newValue' && <input type='text' placeholder='New tag' onBlur={(e) => handleNewTagBlur(index, e.target.value)} />}
                   <button onClick={() => handleRemoveTag(index)}>Remove</button>
                 </>
               ) : (
