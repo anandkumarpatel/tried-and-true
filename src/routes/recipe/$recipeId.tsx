@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { deleteRecipe, getRecipe, getTags, updateRecipe } from '../../services/backend'
 import { Ingredient, Recipe } from '../../types'
 import './$recipeId.css'
@@ -24,17 +24,25 @@ function RecipePage() {
     allTags,
   } = Route.useLoaderData()
   const navigate = useNavigate()
-  const [confirmDelete, setConfirmDelete] = useState(false)
   const [servings, setServings] = useState(recipe.servings)
   const [editedIngredients, setEditedIngredients] = useState(recipe.ingredients)
   const [editedNotes, setEditedNotes] = useState(recipe.notes || [])
   const [editedDirections, setEditedDirections] = useState(recipe.directions)
   const [editedTags, setEditedTags] = useState(recipe.tags || [])
+
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [isEditingIngredients, setIsEditingIngredients] = useState(false)
   const [isEditingNotes, setIsEditingNotes] = useState(false)
   const [isEditingDirections, setIsEditingDirections] = useState(false)
   const [isEditingTags, setIsEditingTags] = useState(false)
   const [tags, setTags] = useState<string[]>(allTags || [])
+
+  useEffect(() => {
+    setEditedIngredients(recipe.ingredients)
+    setEditedNotes(recipe.notes || [])
+    setEditedDirections(recipe.directions)
+    setEditedTags(recipe.tags || [])
+  }, [recipe])
 
   const handleDelete = useCallback(
     async (recipeId: string) => {
