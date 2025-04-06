@@ -3,7 +3,6 @@
 # TODO
 
 - fix ai to say "box" or "can" in description
-- add tags
 - add rating
 - add search
 - select recipe and generate shopping list
