@@ -183,6 +183,7 @@ class RecipeStorage {
   updateById(id, update) {
     const old = this.recipes.find((recipe) => recipe.id === id)
     Object.assign(old, update)
+    this.saveRecipes()
     return
   }
 
