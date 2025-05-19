@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useState } from 'react'
-import { deleteRecipe, getRecipe, getTags, updateRecipe } from '../../services/backend'
+import { deleteRecipe, getRecipe, updateRecipe } from '../../services/backend'
 import { Ingredient, Recipe } from '../../types'
 import './$recipeId.css'
 
@@ -8,7 +8,6 @@ export const Route = createFileRoute('/recipe/$recipeId')({
   loader: async ({ params }) => {
     return {
       recipe: await getRecipe(params.recipeId),
-      allTags: await getTags(),
     }
   },
   component: RecipePage,
@@ -21,7 +20,6 @@ const roundToNearestSixteenth = (value: number) => {
 function RecipePage() {
   const {
     recipe: { recipe, similarRecipes },
-    allTags,
   } = Route.useLoaderData()
   const navigate = useNavigate()
   const [servings, setServings] = useState(recipe.servings)
@@ -35,7 +33,6 @@ function RecipePage() {
   const [isEditingNotes, setIsEditingNotes] = useState(false)
   const [isEditingDirections, setIsEditingDirections] = useState(false)
   const [isEditingTags, setIsEditingTags] = useState(false)
-  const [tags, setTags] = useState<string[]>(allTags || [])
 
   useEffect(() => {
     setEditedIngredients(recipe.ingredients)
@@ -148,7 +145,6 @@ function RecipePage() {
 
   const handleNewTagBlur = (index: number, value: string) => {
     handleTagChange(index, value)
-    setTags((prev) => [...prev, value])
   }
 
   const handleAddTag = () => {
@@ -179,235 +175,333 @@ function RecipePage() {
   }
 
   return (
-    <div className='recipe-page-container'>
-      <div className='recipe-page'>
-        <h2>{recipe.title}</h2>
-        <p>
-          Prep Time: {recipe.prepTime} {recipe.prepTimeUnit}
-        </p>
-        <p>
-          Cook Time: {recipe.cookTime} {recipe.cookTimeUnit}
-        </p>
-        <p>
-          Total Time: {recipe.totalTime} {recipe.totalTimeUnit}
-        </p>
-        <p>
-          Servings:
-          <button disabled={servings === 1} onClick={() => handleServingsChange(-1)} className='servings-button'>
-            -
-          </button>
-          <span className={`servings-count ${servings !== recipe.servings ? 'modified' : ''}`}>{servings}</span>
-          <button onClick={() => handleServingsChange(1)} className='servings-button'>
-            +
-          </button>
-        </p>
-        {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} className='responsive-image' />}
-        <h3>Ingredients</h3>
-        <button
-          onClick={() => {
-            if (isEditingIngredients) {
-              handleSave({ ingredients: editedIngredients })
-            }
-            setIsEditingIngredients(!isEditingIngredients)
-          }}
-          className='edit-button'
-        >
-          {isEditingIngredients ? 'Save' : 'Edit'}
-        </button>
-
-        {isEditingIngredients && (
-          <>
-            <button onClick={() => handleCancel('ingredients')} className='revert-button'>
-              Cancel
-            </button>
-
-            {recipe.originalIngredients && (
-              <button onClick={() => handleRevert('ingredients')} className='revert-button'>
-                Show Original
+    <div className='recipe-container'>
+      <div className='recipe-content'>
+        <div className='recipe-card'>
+          <div className='recipe-header'>
+            <div>
+              <h2 className='recipe-title'>{recipe.title}</h2>
+              <div className='recipe-meta'>
+                <p>
+                  Prep Time: {recipe.prepTime} {recipe.prepTimeUnit}
+                </p>
+                <p>
+                  Cook Time: {recipe.cookTime} {recipe.cookTimeUnit}
+                </p>
+                <p>
+                  Total Time: {recipe.totalTime} {recipe.totalTimeUnit}
+                </p>
+              </div>
+            </div>
+            <div className='servings-control'>
+              <button disabled={servings === 1} onClick={() => handleServingsChange(-1)} className='servings-button'>
+                -
               </button>
-            )}
-          </>
-        )}
-        {Object.keys(groupedIngredients).map((group) => (
-          <div key={group}>
-            {hasGroups && group !== 'Other' && <h4>{group}</h4>}
-            <ul>
-              {groupedIngredients[group].map((ingredient, index) => (
-                <IngredientLine
-                  key={index}
-                  ingredient={ingredient}
-                  isEditing={isEditingIngredients}
-                  onChange={(name, value) => handleIngredientChange(index, name, value)}
-                  baseServings={recipe.servings}
-                  currentServings={servings}
-                />
-              ))}
-            </ul>
+              <span className={`servings-count ${servings !== recipe.servings ? 'modified' : ''}`}>{servings}</span>
+              <button onClick={() => handleServingsChange(1)} className='servings-button'>
+                +
+              </button>
+            </div>
           </div>
-        ))}
-        <h3>Directions</h3>
-        <button
-          onClick={() => {
-            if (isEditingDirections) {
-              handleSave({ directions: editedDirections })
-            }
-            setIsEditingDirections(!isEditingDirections)
-          }}
-          className='edit-button'
-        >
-          {isEditingDirections ? 'Save' : 'Edit'}
-        </button>
-        {isEditingDirections && (
-          <>
-            <button onClick={() => handleCancel('directions')} className='revert-button'>
-              Cancel
-            </button>
 
-            {recipe.originalDirections && (
-              <button onClick={() => handleRevert('directions')} className='revert-button'>
-                Show Original
-              </button>
-            )}
-          </>
-        )}
-        <ol>
-          {editedDirections.map((direction, index) => (
-            <li key={index}>
-              {isEditingDirections ? (
-                <>
-                  <textarea
-                    value={direction.instruction}
-                    onChange={(e) => handleDirectionChange(index, 'instruction', e.target.value)}
-                    placeholder='Instruction'
-                    rows={4}
-                    cols={50}
-                  />
-                  <input type='text' value={direction.image} onChange={(e) => handleDirectionChange(index, 'image', e.target.value)} placeholder='Image URL' />
-                  <button onClick={() => handleRemoveDirection(index)}>Remove</button>
-                </>
-              ) : (
-                <>
-                  {direction.instruction}
-                  {direction.image && <img src={direction.image} alt={`Step ${index + 1}`} className='responsive-image' />}
-                </>
+          {recipe.mainImage && (
+            <div className='section'>
+              <img src={recipe.mainImage} alt={recipe.title} className='recipe-image' />
+            </div>
+          )}
+
+          <div className='section'>
+            <div className='section-header'>
+              <h3 className='section-title'>Ingredients</h3>
+              <div className='button-group'>
+                <button
+                  onClick={() => {
+                    if (isEditingIngredients) {
+                      handleSave({ ingredients: editedIngredients })
+                    }
+                    setIsEditingIngredients(!isEditingIngredients)
+                  }}
+                  className='button button-primary'
+                >
+                  {isEditingIngredients ? 'Save' : 'Edit'}
+                </button>
+
+                {isEditingIngredients && (
+                  <>
+                    <button onClick={() => handleCancel('ingredients')} className='button button-secondary'>
+                      Cancel
+                    </button>
+
+                    {recipe.originalIngredients && (
+                      <button onClick={() => handleRevert('ingredients')} className='button button-secondary'>
+                        Show Original
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className='ingredients-list'>
+              {Object.keys(groupedIngredients).map((group) => (
+                <div key={group} className='ingredient-group'>
+                  {hasGroups && group !== 'Other' && <h4 className='ingredient-group-title'>{group}</h4>}
+                  <ul className='ingredient-items'>
+                    {groupedIngredients[group].map((ingredient, index) => (
+                      <IngredientLine
+                        key={index}
+                        ingredient={ingredient}
+                        isEditing={isEditingIngredients}
+                        onChange={(name, value) => handleIngredientChange(index, name, value)}
+                        baseServings={recipe.servings}
+                        currentServings={servings}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className='section'>
+            <div className='section-header'>
+              <h3 className='section-title'>Directions</h3>
+              <div className='button-group'>
+                <button
+                  onClick={() => {
+                    if (isEditingDirections) {
+                      handleSave({ directions: editedDirections })
+                    }
+                    setIsEditingDirections(!isEditingDirections)
+                  }}
+                  className='button button-primary'
+                >
+                  {isEditingDirections ? 'Save' : 'Edit'}
+                </button>
+
+                {isEditingDirections && (
+                  <>
+                    <button onClick={() => handleCancel('directions')} className='button button-secondary'>
+                      Cancel
+                    </button>
+
+                    {recipe.originalDirections && (
+                      <button onClick={() => handleRevert('directions')} className='button button-secondary'>
+                        Show Original
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className='directions-list'>
+              {editedDirections.map((direction, index) => (
+                <div key={index} className='direction-item'>
+                  <div className='direction-number'>{index + 1}</div>
+                  <div className='direction-content'>
+                    {isEditingDirections ? (
+                      <div className='space-y-2'>
+                        <textarea
+                          value={direction.instruction}
+                          onChange={(e) => handleDirectionChange(index, 'instruction', e.target.value)}
+                          className='ingredient-input'
+                          rows={3}
+                        />
+                        <input
+                          type='text'
+                          value={direction.image}
+                          onChange={(e) => handleDirectionChange(index, 'image', e.target.value)}
+                          placeholder='Image URL (optional)'
+                          className='ingredient-input'
+                        />
+                        <button onClick={() => handleRemoveDirection(index)} className='button button-danger'>
+                          Remove Step
+                        </button>
+                      </div>
+                    ) : (
+                      <div className='space-y-2'>
+                        <p className='direction-text'>{direction.instruction}</p>
+                        {direction.image && <img src={direction.image} alt={`Step ${index + 1}`} className='direction-image' />}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {isEditingDirections && (
+                <button onClick={handleAddDirection} className='button button-primary'>
+                  Add Step
+                </button>
               )}
-            </li>
-          ))}
-        </ol>
-        {isEditingDirections && <button onClick={handleAddDirection}>Add Direction</button>}
+            </div>
+          </div>
 
-        <h3>Notes</h3>
-        <button
-          onClick={() => {
-            if (isEditingNotes) {
-              handleSave({ notes: editedNotes })
-            } else {
-              if (!editedNotes?.length) {
-                handleAddNote()
-              }
-            }
-            setIsEditingNotes(!isEditingNotes)
-          }}
-          className='edit-button'
-        >
-          {isEditingNotes ? 'Save' : 'Edit'}
-        </button>
-        {isEditingNotes && (
-          <>
-            <button onClick={() => handleCancel('notes')} className='revert-button'>
-              Cancel
-            </button>
+          <div className='section'>
+            <div className='section-header'>
+              <h3 className='section-title'>Notes</h3>
+              <div className='button-group'>
+                <button
+                  onClick={() => {
+                    if (isEditingNotes) {
+                      handleSave({ notes: editedNotes })
+                    }
+                    setIsEditingNotes(!isEditingNotes)
+                  }}
+                  className='button button-primary'
+                >
+                  {isEditingNotes ? 'Save' : 'Edit'}
+                </button>
 
-            {recipe.originalNotes && (
-              <button onClick={() => handleRevert('notes')} className='revert-button'>
-                Show Original
-              </button>
-            )}
-          </>
-        )}
-        <ul>
-          {editedNotes.map((note, index) => (
-            <li key={index}>
+                {isEditingNotes && (
+                  <>
+                    <button onClick={() => handleCancel('notes')} className='button button-secondary'>
+                      Cancel
+                    </button>
+
+                    {recipe.originalNotes && (
+                      <button onClick={() => handleRevert('notes')} className='button button-secondary'>
+                        Show Original
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className='notes-list'>
               {isEditingNotes ? (
                 <>
-                  <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} placeholder='Note' rows={4} cols={50} />
-                  <button onClick={() => handleRemoveNote(index)}>Remove</button>
+                  {editedNotes.map((note, index) => (
+                    <div key={index} className='ingredient-item'>
+                      <textarea value={note} onChange={(e) => handleNoteChange(index, e.target.value)} className='ingredient-input' rows={2} />
+                      <button onClick={() => handleRemoveNote(index)} className='button button-danger'>
+                        <svg className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                          <path
+                            fillRule='evenodd'
+                            d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                            clipRule='evenodd'
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={handleAddNote} className='button button-primary'>
+                    Add Note
+                  </button>
                 </>
               ) : (
-                note
+                <ul className='notes-list'>
+                  {editedNotes.map((note, index) => (
+                    <li key={index} className='note-item'>
+                      {note}
+                    </li>
+                  ))}
+                </ul>
               )}
-            </li>
-          ))}
-        </ul>
-        {isEditingNotes && <button onClick={handleAddNote}>Add Note</button>}
-
-        <h3>Tags</h3>
-        <button
-          onClick={() => {
-            if (isEditingTags) {
-              handleSave({ tags: editedTags })
-            }
-            setIsEditingTags(!isEditingTags)
-          }}
-          className='edit-button'
-        >
-          {isEditingTags ? 'Save' : 'Edit'}
-        </button>
-        {isEditingTags && (
-          <button onClick={() => handleCancel('tags')} className='revert-button'>
-            Cancel
-          </button>
-        )}
-        <ul>
-          {editedTags.map((tag, index) => (
-            <li key={index}>
-              {isEditingTags ? (
-                <>
-                  {tag && tag !== 'newValue' ? (
-                    tag
-                  ) : (
-                    <select value={tag} onChange={(e) => handleTagChange(index, e.target.value)}>
-                      <option value=''>Select a tag</option>
-                      {tags
-                        .filter((t) => !editedTags.includes(t))
-                        .map((t, i) => (
-                          <option key={i} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      <option value='newValue'>Add new tag</option>
-                    </select>
-                  )}
-                  {tag === 'newValue' && <input type='text' placeholder='New tag' onBlur={(e) => handleNewTagBlur(index, e.target.value)} />}
-                  <button onClick={() => handleRemoveTag(index)}>Remove</button>
-                </>
-              ) : (
-                tag
-              )}
-            </li>
-          ))}
-        </ul>
-        {isEditingTags && <button onClick={handleAddTag}>Add Tag</button>}
-
-        <p>
-          Source:{' '}
-          <a href={recipe.sourceUrl} target='_blank' rel='noopener noreferrer'>
-            {recipe.sourceUrl}
-          </a>
-        </p>
-        <h3>Similar Recipes</h3>
-        <div className='similar-recipes-container'>
-          {similarRecipes.map((similarRecipe) => (
-            <div key={similarRecipe.id} className='similar-recipe-card' onClick={() => handleCardClick(similarRecipe.id)}>
-              <h4>{similarRecipe.title}</h4>
-              {similarRecipe.mainImage && <img src={similarRecipe.mainImage} alt={similarRecipe.title} className='responsive-image' />}
-              <p>Matching Ingredients: {similarRecipe.similarIngredients.join(', ')}</p>
             </div>
-          ))}
+          </div>
+
+          <div className='section'>
+            <div className='section-header'>
+              <h3 className='section-title'>Tags</h3>
+              <div className='button-group'>
+                <button
+                  onClick={() => {
+                    if (isEditingTags) {
+                      handleSave({ tags: editedTags })
+                    }
+                    setIsEditingTags(!isEditingTags)
+                  }}
+                  className='button button-primary'
+                >
+                  {isEditingTags ? 'Save' : 'Edit'}
+                </button>
+
+                {isEditingTags && (
+                  <button onClick={() => handleCancel('tags')} className='button button-secondary'>
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className='tags-container'>
+              {isEditingTags ? (
+                <div className='space-y-2'>
+                  {editedTags.map((tag, index) => (
+                    <div key={index} className='ingredient-item'>
+                      <input
+                        type='text'
+                        value={tag}
+                        onChange={(e) => handleTagChange(index, e.target.value)}
+                        onBlur={(e) => handleNewTagBlur(index, e.target.value)}
+                        className='ingredient-input'
+                      />
+                      <button onClick={() => handleRemoveTag(index)} className='button button-danger'>
+                        <svg className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                          <path
+                            fillRule='evenodd'
+                            d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                            clipRule='evenodd'
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  <button onClick={handleAddTag} className='button button-primary'>
+                    Add Tag
+                  </button>
+                </div>
+              ) : (
+                <div className='tags-list'>
+                  {editedTags.map((tag, index) => (
+                    <span key={index} className='tag'>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className='delete-section'>
+            <button onClick={handleDeleteClick} className={`delete-button ${confirmDelete ? 'confirm' : ''}`}>
+              {confirmDelete ? 'Click again to confirm delete' : 'Delete Recipe'}
+            </button>
+          </div>
         </div>
-        <button className='delete-button' onClick={handleDeleteClick}>
-          {confirmDelete ? 'Really Delete?' : 'Delete'}
-        </button>
+
+        {similarRecipes && similarRecipes.length > 0 && (
+          <div className='similar-recipes'>
+            <h3 className='similar-recipes-title'>Similar Recipes</h3>
+            <div className='similar-recipes-grid'>
+              {similarRecipes.map((recipe) => (
+                <div key={recipe.id} onClick={() => handleCardClick(recipe.id)} className='similar-recipe-card'>
+                  <div className='similar-recipe-content'>
+                    <div className='similar-recipe-header'>
+                      <div className='similar-recipe-body'>
+                        {recipe.mainImage && <img src={recipe.mainImage} alt={recipe.title} className='similar-recipe-image' />}
+                        <div className='similar-recipe-info'>
+                          <h3 className='similar-recipe-title'>{recipe.title}</h3>
+                          {recipe.tags && (
+                            <div className='similar-recipe-tags'>
+                              {recipe.tags.map((tag, index) => (
+                                <span key={index} className='tag'>
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -430,22 +524,26 @@ function IngredientLine({
     const { name, value } = e.target
     onChange(name, value)
   }
-  const amount = roundToNearestSixteenth((ingredient.amount * currentServings) / baseServings)
+
+  const scaledAmount = ingredient.amount ? roundToNearestSixteenth((ingredient.amount * currentServings) / baseServings) : null
+
   return (
-    <li>
+    <li className='ingredient-item'>
       {isEditing ? (
         <>
-          <input type='number' name='amount' value={ingredient.amount} onChange={handleChange} placeholder='Amount' />
-          <input type='text' name='amountUnit' value={ingredient.amountUnit} onChange={handleChange} placeholder='Unit' />
-          <input type='text' name='name' value={ingredient.name} onChange={handleChange} placeholder='Name' />
-          <input type='text' name='preparation' value={ingredient.preparation} onChange={handleChange} placeholder='Preparation' />
-          <input type='text' name='notes' value={ingredient.notes} onChange={handleChange} placeholder='Notes' />
+          <input type='number' name='amount' value={ingredient.amount || ''} onChange={handleChange} className='ingredient-input' />
+          <input type='text' name='amountUnit' value={ingredient.amountUnit || ''} onChange={handleChange} placeholder='unit' className='ingredient-input' />
+          <input type='text' name='name' value={ingredient.name} onChange={handleChange} className='ingredient-input' />
+          <input type='text' name='group' value={ingredient.group || ''} onChange={handleChange} placeholder='group (optional)' className='ingredient-input' />
         </>
       ) : (
-        <>
-          {amount} {ingredient.amountUnit} {ingredient.name} {ingredient.preparation && `(${ingredient.preparation})`}
+        <span className='ingredient-text'>
+          {scaledAmount !== null && `${scaledAmount} `}
+          {ingredient.amountUnit && `${ingredient.amountUnit} `}
+          {ingredient.name}
+          {ingredient.preparation && ` (${ingredient.preparation})`}
           {ingredient.notes && ` - ${ingredient.notes}`}
-        </>
+        </span>
       )}
     </li>
   )
